@@ -1,0 +1,46 @@
+\documentclass[border=1mm,
+               class=article
+               preview]{standalone}
+
+
+\begin{document}
+	\resizebox{\columnwidth}{!}{
+		\pgfdeclarelayer{bg}    % declare background layer
+		\pgfsetlayers{bg,main}  % set the order of the layers (main is the standard layer)
+		\tikzset{cluster/.style = {shape=circle,draw, minimum size = 1.2cm}}
+		\tikzset{node/.style = {shape=circle,draw,fill=black}}
+		\tikzset{path/.style = {-latex'}}
+		\captionsetup{
+				labelfont=bf,
+				justification=centering,
+				font={small}
+			}
+		\begin{tikzpicture}[scale=1]
+			\begin{axis}[
+			title={\caption{Mean Requests per Second\\($\mu = 0$)}\label{graph:0MuMeanRPS}}, 
+			title style={yshift=2.5ex,text width=8cm, align=center},
+				xlabel={Number of worker threads per peer},
+				ylabel={Requests per second},
+				ybar,
+				legend style={at={(1,1.13)},legend columns=-1, font=\footnotesize},
+				legend cell align=center,
+				legend image post style={xscale=1.7},
+				bar width=6pt,
+				xtick=data,
+				xticklabels from table={\cacheAVG}{Config},
+				ymin=0,
+				enlarge x limits=0.2,
+				restrict y to domain=<0>:<5000>,
+				xmajorgrids=true,
+				x tick label style={rotate=0,anchor=north,font=\footnotesize, align=center},
+				y tick label style={rotate=0},
+			]
+			\addplot[style={ppurple,fill=ppurple}] table [x expr=\coordindex,y=m0RPS,col sep=comma] {\defaultAVG};
+			\addplot[style={bblue,fill=bblue}] table [x expr=\coordindex,y=m0RPS,col sep=comma] {\cacheAVG};
+			\addplot[style={ggreen,fill=ggreen}] table [x expr=\coordindex,y=m0RPS,col sep=comma] {\pagingAVG};
+			\addplot[style={rred,fill=rred}] table [x expr=\coordindex,y=m0RPS,col sep=comma] {\bothAVG};
+			\legend{Unmodified,Replication,Paging,Both};
+			\end{axis}
+		\end{tikzpicture}
+	}
+\end{document}

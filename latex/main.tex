@@ -1,0 +1,915 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% LaTeX Template: Project Titlepage Modified (v 0.1) by rcx
+%
+% Original Source: http://www.howtotex.com
+% Date: February 2014
+% 
+% This is a title page template which be used for articles & reports.
+% 
+% This is the modified version of the original Latex template from
+% aforementioned website.
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[12pt]{report}
+\usepackage[a4paper]{geometry}
+\usepackage[myheadings]{fullpage}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{soul}
+\usepackage{newfloat}
+\usepackage{graphicx, wrapfig, subcaption, setspace, booktabs}
+\usepackage[font=small, labelfont=bf]{caption}
+\usepackage[english]{babel}
+\usepackage{sectsty}
+\usepackage{url, lipsum}
+\usepackage{fontspec}
+\usepackage{titlesec}
+\usepackage{standalone}
+\usepackage{cite}
+\usepackage{amsthm}
+\usepackage{pgfplots}
+\usepackage{xparse}
+\usepackage{pgfplotstable}
+\usepackage{filecontents}
+\usepackage{mdwmath}
+\usepackage{float}
+\usepackage{scrextend}
+\usepackage{mdwtab}
+\usepackage{framed}
+\usepackage{stfloats}
+\usepackage{algorithmicx}
+\usepackage[figure]{algorithm2e} 
+\usepackage{tikz}
+\usepackage{multicol}
+\usepackage{indentfirst}
+\usepackage{tikzpagenodes}
+\usepackage{flushend}
+\usetikzlibrary{calc,tikzmark}
+\usetikzlibrary{arrows}
+\usetikzlibrary{fit,backgrounds}
+\usetikzlibrary{external}
+
+%-------------------------------------------------------------------------------
+% COLOR DEFINITIONS
+%-------------------------------------------------------------------------------
+
+\definecolor{bblue}{HTML}{4F81BD}
+\definecolor{rred}{HTML}{C0504D}
+\definecolor{ggreen}{HTML}{9BBB59}
+\definecolor{ppurple}{HTML}{9F4C7C}
+\definecolor{icterine}{HTML}{FCF75E}
+\definecolor{HotDataAdd}{HTML}{FCF75E}
+\definecolor{HotDataOutline}{HTML}{FF7E00}
+\definecolor{ColdDataAdd}{HTML}{79BAEC}
+\definecolor{ColdDataOutline}{HTML}{157DEC}
+
+
+
+\pgfplotstableread[col sep=comma]{data/caching.csv}\datatable
+\pgfplotstableread[col sep=comma]{data/Simulation Combos - AVGDefault.csv}\defaultAVG
+\pgfplotstableread[col sep=comma]{data/Simulation Combos - AVGCache.csv}\cacheAVG
+\pgfplotstableread[col sep=comma]{data/Simulation Combos - AVGPaging.csv}\pagingAVG
+\pgfplotstableread[col sep=comma]{data/Simulation Combos - AVGBoth.csv}\bothAVG
+
+\pgfplotsset{compat=1.14,
+        /pgfplots/ybar legend/.style={
+        /pgfplots/legend image code/.code={%
+        %\draw[##1,/tikz/.cd,yshift=-0.25em]
+                %(0cm,0cm) rectangle (3pt,0.8em);},
+        \draw[##1,/tikz/.cd,bar width=3pt,yshift=-0.2em,bar shift=0pt]
+                plot coordinates {(0cm,0.8em)};},
+},
+}
+%More headings%
+\setcounter{secnumdepth}{5} % seting level of numbering (default for "report" is 3). With ''-1'' you have non number also for chapters
+ %\setcounter{tocdepth}{5} % if you want all the levels in your table of contents
+
+\titleformat{\paragraph}[hang]{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}{0pt}{3.25ex plus 1ex minus .2ex}{0.5em}
+
+\titleformat{\subparagraph}[hang]{\normalfont\normalsize\bfseries}{\thesubparagraph}{1em}{}
+\titlespacing*{\subparagraph}{0pt}{3.25ex plus 1ex minus .2ex}{0.5em}
+
+
+\makeatletter
+\renewcommand{\thesection}{%
+  \ifnum\c@chapter<1 \@arabic\c@section
+  \else \thechapter.\@arabic\c@section
+  \fi
+}
+\makeatother
+
+\setmainfont{Tiempo}
+
+\newsavebox\mybox
+\theoremstyle{plain}
+\newtheorem{property}{Property}
+\newtheorem{definition}{Definition}
+
+\newcommand{\HRule}[1]{\rule{\linewidth}{#1}}
+\onehalfspacing
+\setcounter{tocdepth}{5}
+\setcounter{secnumdepth}{5}
+
+
+
+%GRAPH COUNTER
+\DeclareFloatingEnvironment[name=Position]{pos}
+\DeclareFloatingEnvironment[name=Graph,fileext=graphs]{graph}
+\captionsetup[graph]{
+	labelfont=bf,
+	justification=centering,
+	font={small}
+}
+
+
+
+%HIGHLIGHT DEFS
+	\newcounter{highlight}
+	\NewDocumentEnvironment{highlight}{m O{white} O{0cm}}{%
+		\refstepcounter{highlight}%
+		\vspace{1.2mm}%
+		\noindent%
+		\begin{tikzpicture}[overlay, remember picture]%
+			\path [fill=#1,draw=#2,rounded corners=#3] 
+				let \p1 = (pic cs:start\thehighlight) in 
+				let \p2 = (pic cs:end\thehighlight) in 
+				let \p3 = (current page text area.east) in 
+				([yshift=0.35cm, xshift=-0.62em]pic cs:start\thehighlight) rectangle ([xshift=-0.5cm,yshift=0.32cm]\dimexpr\x3+4em\relax,\y2);%
+		\end{tikzpicture}%
+		\tikzmark{start\thehighlight}%
+		\hspace*{-0.23em}%
+	}{%
+		\vspace*{1.2mm}%
+		\tikzmark{end\thehighlight}%
+		\hspace*{-0.18em}%
+	}
+	\newcommand*{\HiLi}[4]{%
+		\tikz[baseline=(X.base)] \node[rectangle, fill=#2,draw=#3, rounded corners=#4, inner sep=0.3mm] (X) {#1};%
+	}
+
+%-------------------------------------------------------------------------------
+% HEADER & FOOTER
+%-------------------------------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\setlength\headheight{15pt}
+\fancyfoot[C]{\thepage}
+\fancyhead[L]{}
+\fancyhead[R]{James R. Wilburn}
+%-------------------------------------------------------------------------------
+% TITLE PAGE
+%-------------------------------------------------------------------------------
+
+\tikzexternalize
+\tikzset{external/force remake}
+\begin{document}
+
+\title{
+		{
+		\begin{center}
+			\input{figures/4H.tex}
+		\end{center}
+		}
+		\HRule{0.5pt} \\
+		\LARGE \textbf{\uppercase{Improving a Hypercube-Structured Distributed Hash Table}}
+		\HRule{2pt} \\ [0.5cm]
+		\normalsize \today \vspace*{2\baselineskip}}
+
+\date{}
+
+\author{
+		James Wilburn\\ 
+		Poolesville High School\\
+		Mentor: Dr. Udaya Shankar \\
+		University of Maryland College Park\\
+		Department of Computer Science }
+
+\begin{titlepage}
+\maketitle
+\newpage
+\end{titlepage}
+%-------------------------------------------------------------------------------
+% section** title formatting
+\sectionfont{\scshape}
+%-------------------------------------------------------------------------------
+
+%-------------------------------------------------------------------------------
+% BODY
+%-------------------------------------------------------------------------------
+\doublespacing
+\section*{Abstract}
+\hspace{1em}
+This project modified a preexisting hypercube-structured distributed hash table to improve performance and reduce latency in requests while maintaining the core properties of the algorithm. These benefits were realized by modifying the base algorithm and implementing the replication of hot data to local nodes and the paging of infrequently accessed data. The replication of frequently accessed data reduced the distance requests have to travel, thereby reducing the overall latency per request and increasing the number of requests each peer can serve. The paging of infrequently accessed data reduced memory footprint at a minimal cost to overhead. These modifications addressed inherent limitations of scale in the practicality of distributed hash tables in general. Simulation of the proposed modifications with varying configurations, thread count, and proportion of malicious peers verified that these improvements preserved correctness of the algorithm while enhancing functionality.
+\clearpage
+
+\section*{Introduction}
+\hspace{1em}
+Peer-to-peer systems are a popular method of providing relatively high-performance file and data storage with minimal investment. As such, numerous peer-to-peer overlays have been developed (e.g. CAN\cite{ratnasamy_scalable_2001}, Chord\cite{stoica_chord:_2001}, Tapestry \cite{zhao_tapestry:_2001}, Pastry \cite{rowstron_pastry:_2001}, PeerCube\cite{anceaume_peercube:_2008} to name a few). These systems are all dependent on distributed hash tables (DHTs), consisting of an ID space that is partitioned across multiple peers. Overlays are built to impose various properties on a DHT. Overlays can be structured or unstructured, but structured overlays provide better scalability, efficiency and fault tolerance at the cost of more maintenance \cite{locher_equus:_2006}. This efficiency and fault tolerance is significantly reduced under high rates of churn. PeerCube provides resistance to a large number of peers leaving and joining the network as well as some resistance to malicious peers \cite{anceaume_peercube:_2008}. These are the core, desirable properties of PeerCube that are maintained throughout this project.
+
+This paper provides some modifications that can be made to PeerCube to improve performance for frequently accessed data. As a modification of PeerCube, this overlay is also based on a hypercubic topology with clustering at each vertex of the hypercube. The clusters are relatively unstructured. This combination of a small-scale unstructured DHT and a large-scale structured DHT overcomes some of the limitations of each. Firstly, the unstructured clusters never expand to a large size. This ensures that the clusters do not suffer from the same scalability constraints that plague larger unstructured DHTs \cite{lua_survey_2005}. Secondly, the clusters are organized hierarchically, with a limited number of core peers that handle traffic and a number of hot-swappable spares. This limits the effects of churn. A new peer does not cause data reshuffling until it is necessary to restructure in order to maintain integrity.
+
+Distributed hash tables in general tend to have relatively poor performance with regard to latency. This is due to each requests requiring a message to be forwarded between many computers.
+
+The modifications provided are namely the replication of frequently accessed data and the paging of infrequently accessed data. The data is replicated closer to the origin of the request to minimize latency by placing a limited connection that preempts the structure of the DHT. As for the paging of the data, the data is simply stored to disk when it has not been accessed within a specified time-frame. This saves memory at each node at the cost of higher initial latency for infrequently accessed data.
+
+The effectiveness of the modifications were evaluated in a simulation. The simulation mimics a real-world implementation but with mock network transactions. Different combinations of configuration, malicious peers, and processing threads were evaluated to determine the relationship between these variables to latency and performance.
+
+
+
+
+\section*{Materials and Methods}
+\hspace{1em}
+The DHT investigated in this paper is based upon PeerCube \cite{anceaume_peercube:_2008} and 
+as such is composed of hypercube of unstructured clusters. 
+The algorithm as implemented and modified is presented in the following section*. 
+Modifications for replication and paging are highlighted 
+\HiLi{yellow}{HotDataAdd}{HotDataOutline}{0.1cm} and 
+\HiLi{blue}{ColdDataAdd}{ColdDataOutline}{0.1cm} respectively in the following figures.
+
+
+	\subsection*{Algorithm Description}
+		The network exhibits a hypercubic topology. 
+	    A $d$-hypercube has $2^d$ vertices with $d$ edges between each vertex. 
+		The hypercube in figure \ref{fig:4HRC} is 4 dimensional. It has 16 vertices
+		with 4 edges on each vertex.
+		The maximum distance, given by the shortest path along the edges, between any two nodes on the hypercube is 4.
+		Hypercubes were chosen for a few of their key properties.
+	
+		
+		\begin{property}[Recursive Construction \cite{saad_topological_1988}]
+			\label{recursiveconstruction} 
+			A $d$-hypercube can be constructed out of lower dimensional hypercubes.
+		\end{property}
+	
+		
+		%4-Hypercube-labelled%
+		\begin{wrapfigure}{R}{0.4\columnwidth}
+			\vspace{-1cm}
+		    \centering
+			\input{figures/4HRC.tex}
+		    \captionsetup{justification=centering}
+		    \caption{Recursive Construction of \\a 4-Hypercube}
+		    \label{fig:4HRC}
+	    \end{wrapfigure}
+		A $d$-hypercube is constructed by joining each corresponding vertex of two $(d-1)$-hypercubes. 
+		In figure \ref{fig:4HRC},
+		the 4-hypercube is comprised of two cubes such that if each vertex on one cube is given a binary label of 0000 through 0111,
+		the vertex is linked to the vertex on the other cube labeled 1000 through 1111.
+		This means that each vertex is linked only to nodes that differ by exactly one bit i.e. their Hamming distance $\mathcal{H}(a,b)$ equals 1.
+		Property \ref{recursiveconstruction} also implies that a hypercube can be dynamically grown and shrunk,
+		effectively changing the dimensionality of the network.
+		This is important in handling the acquisition of new peers and the loss of old peers as it allows the network to change size 
+		and structure to reflect the total number of peers.
+	
+		
+		\begin{property}[Independent Routes \cite{saad_topological_1988}]
+			\label{independentroutes}
+			If $n$ and $m$ are two vertices on a $d$-hypercube, 
+			there are $d$ independent paths between $n$ and $m$ with lengths less than or equal to $\mathcal{H}(m,n)+2$.
+		\end{property}
+
+%4-Hypercube-paths%
+	    \begin{wrapfigure}{R}{0.4\columnwidth}
+		    \centering
+			\input{figures/4HIR.tex}
+		    \captionsetup{justification=centering}
+		    \caption{Independent Routes in \\a 4-Hypercube}
+		    \label{fig:4HIR}
+	    \end{wrapfigure}
+
+		Independent paths do not share any vertices except the source vertex and the destination vertex.
+		Each leg of the path between $n$ and $m$ changes just one bit.
+		There are $\mathcal{H}(m,n)$ optimal paths of length $\mathcal{H}(m,n)$ and a total of $d$ paths,
+		with a maximum length of $\mathcal{H}(m,n)+2$.
+		In figure \ref{fig:4HIR}, the 4-Hypercube has 4 paths and $\mathcal{H}(m,n)=1$
+		As such, there is one optimal path, colored green, and 3 sub-optimal paths, colored red, purple, and blue.
+
+		
+		%4-Cluster-Attributes-%
+			    \begin{figure}[h]
+					\onehalfspacing
+					\begin{lrbox}{\mybox}
+					\hspace*{-0.8cm}
+					\begin{minipage}{0.91\columnwidth}
+						\linespread{1.5}
+						\vspace{0.2cm}
+				   		\textbf{\large{Cluster $\mathcal{C}$}}
+						\begin{addmargin}[1em]{0em}
+							\textbf{Attributes}
+							\begin{addmargin}[1em]{0em}
+								\textbf{d}: Dimensionality of the cluster\\
+								\textbf{label}: A $d$-bit prefix of the IDs of the peers contained in the cluster\\
+								\textbf{V\textsubscript{C}}:The set of \textit{core} peers. $|V_C| = S_{min}$\\
+								\textbf{V\textsubscript{S}}:The set of \textit{spare} peers.\\
+								\textbf{V\textsubscript{T}}:The set of \textit{temporary} peers.\\
+								
+							\end{addmargin}
+						\end{addmargin}
+					\end{minipage}
+					\end{lrbox}
+					\framebox[\columnwidth]{\hspace*{15pt}\usebox\mybox\par}
+					\caption{Cluster Attribute Overview}
+				    \label{fig:CLUSTERDEF}
+			    \end{figure}
+
+		\subsubsection*{Clusters}
+			A cluster is a structure containing sets of peers (as defined in section* \ref{SEC:PEER}).
+			Each new peer is randomly assigned a unique random identifier from an $m$-bit ID space. 
+			Random ID assignment prevents maliciously targeted insertion of peers.
+			Groups of peers sharing a common prefix gather in \textit{clusters}.
+			Each cluster is labeled with the \textit{common prefix} of it's contained peers.
+			A cluster's label describes its location in the hypercube and determines which other clusters are its neighbors. 
+
+	   
+			
+			\begin{property}[Non-Inclusion]
+				\label{non-inclusion}
+				If a cluster $\mathcal{C}$ exists and is labeled $b_0...b_{d-1}$, 
+				then no cluster $\mathcal{C'}$ with $\mathcal{C} \neq \mathcal{C'}$ whose label is prefixed by $b_0...b_{d-1}$ exists.
+			\end{property}
+
+			The length of a cluster label is the \textit{dimension} of that cluster. 
+			A cluster of dimension $d$ is a referred to as a $d$-cluster and has a label $d$ bits long.
+			The peers in a $d$ cluster maintain a routing table with the $d$ closest neighbors, 
+			as defined by distance function $\mathcal{D}$ in equation \ref{distanceD}. 
+			
+			A key referring to some data is routed to the cluster whose label is closest to that of the key.
+			Each peer in a cluster is responsible for the same data and data keys.
+			In effect, the data is replicated across all peers in a cluster.
+			Clusters have a maximum size $S_{max}$ and a minimum size $S_{min}$.
+			$S_{min}$ and $S_{max}$ are constants defined by the probability of peer failure and the proportion of malicious peers respectively.
+
+		\subsubsection*{Topology}
+
+		%4-Network-Clusters%
+	    \begin{wrapfigure}{r}{0.4\columnwidth}
+		    \hspace*{-0.05\linewidth}
+		    \centering
+			\input{figures/CLUSTERS.tex}
+		    \captionsetup{justification=centering}
+		    \caption{Clusters organized \\in a 2-hypercube}
+		    \label{fig:CLUSTERS}
+	    \end{wrapfigure}
+
+			Clusters organize into hypercubes by their labels. 
+			Figure \ref{fig:CLUSTERS} depicts four 2-clusters with varying numbers of peers organized into a 2-hypercube. 
+			An ideal $d$-hypercube is comprised of $2^d$ $d$-clusters. 
+			Each cluster is linked to at most $d$ other close clusters, as defined by distance $\mathcal{D}$. 
+			
+
+			
+			\begin{definition}
+				Let $\mathcal{C}$ and $\mathcal{C'}$ be clusters of dimensionality $d$ and $d'$ respectively. Distance $\mathcal{D}$ can be defined as such:
+				\begin{equation}
+					\label{distanceD}
+					\mathcal{D(C,C')} = \mathcal{D}(a_0...a_{d-1}, b_0...b_{d'-1})=\sum\limits_{i=0,a_i \neq b_i}^{m-1} 2^{m-i}
+				\end{equation}
+			\end{definition}
+
+			This function is defined as such so that for any given ID $a_0...a_{d-1}$ and any given distance $\Delta$,
+			there exists exactly one ID $b_0...b_{d-1}$ such that $\mathcal{D}(a_0...a_{d-1},b_0...b_{d-1}) = \Delta$. \
+			This ensures that unique closeness can be determined by each cluster.
+						
+			\paragraph*{Splitting and Merging}
+			Maintaining an ideal hypercube is not always a possible. Due to randomness of ID assignment and churn, clusters may grow or shrink non-uniformly.
+			When the size of cluster $\mathcal{C}$ is less than $S_{min}$, 
+			$\mathcal{C}$ must merge with other clusters into a single cluster $\mathcal{C'}$ with a size greater than $S_{min}$.
+			On the other hand, when the size of cluster $\mathcal{C}$ is greater than $S_{max}$, 
+			$\mathcal{C}$ must split into two $(d+1)$-clusters each of size between $S_{min}$ and $S_{max}$.
+			
+			\vspace{0.2cm}
+			
+			%Splitting%
+			\begin{figure}[H]
+				\begin{subfigure}{.5\textwidth}
+				\centering
+				\input{figures/PRESPLIT.tex}
+				\vspace{2.2em}
+				\caption{Network before cluster split}
+				\label{fig:preSplit}
+				\end{subfigure}
+				\begin{subfigure}{.5\textwidth}
+				\centering
+				\vspace{-0.6em}
+				%\hspace*{0.1\linewidth}
+				\input{figures/POSTSPLIT.tex}
+				\captionsetup{}
+				\caption{Network after cluster split}
+				\label{fig:postSplit}
+				\end{subfigure}
+				\captionsetup{}
+				\caption{Cluster split process}
+				\label{fig:Split}
+			\end{figure}
+			
+			Figure \ref{fig:Split} depicts the \emph{split} process. When cluster 00 in figure \ref{fig:preSplit} reaches size $S_{max}$, it must split.
+			Figure \ref{fig:postSplit} depicts the network after 00 splits into 000 and 001. 
+			Cluster 000 remains in the same effective location as cluster 00. Cluster 001 inherits the links of cluster 00 as well as a link to 000.
+			Data is also partitioned and transfered following a cluster split. Data at 001... stored in cluster 00 would be migrated to cluster 001. 
+			Merging follows a similar,
+			yet backwards, process progressing from \ref{fig:postSplit} to \ref{fig:preSplit}.
+			
+			\subparagraph*{Hot Data Replication}	
+			When the data is partitioned during a split, the responsibility for managing replications is also partitioned. In figure \ref{fig:Split}, 
+			the link representing data at key 001... stored in cluster 00 replicated to 11 would be transfered to cluster 001.
+			During a merge process, the responsibility for managing replications would be consolidated in the new condensed cluster.
+
+		%4-Peer-Attributes-%
+			    \begin{figure}[h]
+			    		\onehalfspacing
+					\begin{lrbox}{\mybox}
+					\hspace*{-0.8cm}
+					\begin{minipage}{0.91\columnwidth}
+						\linespread{1.5}
+				   		\textbf{\large{Peer \textit{p}}}
+						\vspace{0.2cm}
+						\begin{addmargin}[1em]{0em}
+							\textbf{Attributes}
+							\begin{addmargin}[1em]{0em}
+								\textbf{cluster}: The \textit{cluster} to which $p$ belongs\\
+								\textbf{ID}: An $m$-bit unique identifier. $p$.ID is prefixed by $p$.cluster.Label. Notation:
+								$p$.id$_0...p$.id$_{i}...p$.id$_{m-1}$\\
+								\textbf{RT}: (Routing Table) An array of clusters such that the cluster in $p$.RT[$i$] has a label that differs in bit $i$\\
+								\textbf{RHLC}: (Request Handler for Lookup Count) A map of IDs to integers; 
+								RHLC[$key$] returns the number of pending \textit{lookup} requests for $key$\\
+								\begin{highlight}{HotDataAdd}[HotDataOutline][0.25cm]%
+									\vspace{-0.5em}
+									\textbf{RHRC}: A map of two IDs to integers; RHRC[$key$, $label$] returns the number of \textit{lookup} requests for $key$  											from the cluster labeled $label$.\\
+									\textbf{RHRM}: A map of IDs to sets of cluster objects; RHRM[$key$] contains the set of clusters where $key$ is replicated.
+									\vspace{-0.4em}\\
+								\end{highlight}
+								\vspace{-1em}
+								
+							\end{addmargin}
+						\end{addmargin}
+					\end{minipage}
+					\end{lrbox}
+					\framebox[\columnwidth]{\hspace*{15pt}\usebox\mybox\par}
+					\caption{Peer Attribute Overview}
+				    \label{fig:PEERDEF}
+			    \end{figure}
+
+		
+		\subsubsection*{Peer}
+		A \textit{peer} is the primary structure of this algorithm. 
+		Peers perform operations to react to environmental stimuli and maintain an internal state. 
+		There are three types of peers: core, spare, and temporary.
+		Core peers are responsible for routing and data handling.
+		Spare peers may be promoted to core at any time, but are not responsible for anything as spares.
+		Temporary peers are those peers that did not fit in any particular cluster. 
+		They may eventually form a new cluster.
+
+		The following description of the functions of peers focuses on core peers.
+		For the sake of brevity, only the modifications to the $lookup$ operation are presented in detail.
+		Other modifications were necessary to maintain a valid state of replication, however these are more minor in nature.
+
+		\label{SEC:PEER}
+		\begin{algorithm}
+			\vspace{-0.75cm}
+			\hspace*{-0.76cm}
+			\setstretch{0.87}
+			\scriptsize
+			\LinesNumbered
+			\DontPrintSemicolon
+			\SetKwInOut{Upon}{Upon}
+			\SetKwInOut{Input}{Input}
+			\SetKw{Send}{send}
+			\SetKw{Wait}{wait}
+			\SetNlSty{bfseries}{\color{black}}{}
+			\begin{lrbox}{\mybox}
+				\begin{minipage}{\hsize}
+					% Write your algorithm starting here
+					\Indentp{-1em}
+					\Upon{reception of $(\frac{S_{min}+1}{3}+1)$  ($'lookup'$, $key$, $q$, $origin$\HiLi{, $travelhistory$}{HotDataAdd}{HotDataOutline}{0.1cm}) messages from the network with the same $key$ and $origin$}
+					\Input{$p$ as the local peer}
+					\Indentp{1.2em}
+					\begin{highlight}{HotDataAdd}[HotDataOutline][0.25cm]
+						\If{$p$.DSR has $key$}{
+							\eIf{$p$.RHC$_{key} = 0$}{
+								$p$.RHC$_{key} \gets (\frac{S_{min}+1}{3}+1)$\;
+								\ForEach{$\phi \in p.cluster.V_c$}{
+								 	\Send{($'lookup'$, $key$, $q$, $origin$, $travelhistory$) to  $\phi$}\;
+								}
+							}{
+								$data \gets p.DS[key]$\;
+								\Send{($'lookupreturn'$, $key$, $data$, $p$) to  $q$}\;
+								\Send{($'lookupinform'$, $key$, $travelhistory \cup p$.cluster.Label)}  to RHRH[$key$]\;
+							}
+						}
+					\end{highlight}
+					$C \gets p$.findClosestCluster($key.id$)\;
+					\tcp{Finds closest cluster in p.RT by distance $\mathcal{D}$}
+					\eIf{$C.label$ = $p.cluster.label$}{
+						\eIf{$p.RHC_{key} = 0$}{
+							$p.RHC_{key} \gets (\frac{S_{min}+1}{3}+1)$\;%
+							\ForEach{$\phi \in C.V_c$}{
+							 	\Send{($'lookup'$, $key$, $q$, $origin$\HiLi{, $travelhistory$}{HotDataAdd}{HotDataOutline}{0.1cm}) to  $\phi$}\;
+							}
+						}{
+							\HiLi{\tcp{May have to check and retrieve from disk}}{ColdDataAdd}{ColdDataOutline}{0.1cm}\;
+							$data \gets p.DS[key]$\;
+							\begin{highlight}{HotDataAdd}[HotDataOutline][0.15cm]
+								\tcp{Counts number of times \textit{key}  has been requested from each cluster label in $travelhistory$}%
+								\tcp{If \textit{key} has been requested more than $T_{replicate}$ times by \\some cluster $\mathcal{C'}$,%
+								replicate the data under \textit{key} to $\mathcal{C'}$}
+								\ForEach{$cluster \in travelhistory$}{
+									$p.RHF[key, cluster.Label] \gets p.RHF[key, cluster.Label] + 1$\;			
+									\If{$p.RHF[key, cluster.label]>T_{replicate}$}{%
+										$p.RHRM[key] = p.RHRM[key] \cup cluster$\;
+										\ForEach{$\phi \in p.cluster.V_c$}{
+											\Send{($'replicate'$, $key$, $data$, $p$) to  $\phi$}\;
+										}
+									}
+								}
+							\end{highlight}
+							\begin{highlight}{ColdDataAdd}[ColdDataOutline][0.15cm]
+								\tcp{If \textit{key} has been fewer than $T_{page}$ times, remove from $key$ RAM and}\vspace{-0.5em}
+								\tcp{store in temporary disk space}%
+								\eIf{$p.RHF[key, p.cluster.label]<T_{page}$}{
+									Remove data at $key$ from memory and store in temporary disk space.\;
+								}{
+									Remove data at $key$ from disk and restore in memory.\;
+								}
+							\end{highlight}
+							\Send{($'lookupreturn'$, $key$, $data$, $p$) to  $q$}\;
+							\Return{}\;
+							
+						}
+						\Wait{until $p.RHC[key] = 0$}\; 
+						\tcp{Waits for $\frac{S_{min}+1}{3}+1$ responses about \textit{key}}
+						$p.RHC[key] \gets -1$\;
+						$data \gets  p.RHD[key]$\;
+						$replicate \gets p.RHR[key, q] > T_{cache}$\;
+						\tcp{Whether to replicate key at \textit{q}}
+						\Send{($'lookupreturn'$, key,data, p, replicate) to  q}
+				  	}{
+				  		$p.RHC_{key} \gets (\frac{S_{min}+1}{3}+1)$\;
+						\ForEach{$\varphi \in C.V_c$}{
+						 	\Send{($'lookup'$, key, p, p) to  $\varphi$}\;
+						}
+					}
+					\Wait{until $p.RHC[key] = 0$}\;
+					\tcp{Waits for $\frac{S_{min}+1}{3}+1$ responses about \textit{key}}
+					$p.RHC[key] \gets -1$\;
+					$data \gets  p.RHD[key]$\;
+					$replicate \gets p.RHR[key, q] > T_{cache}$\;
+					\Send{($'lookupreturn'$, $key$,$data$, $p$, $replicate$) to  q}
+					% End your algorithm here
+					\tikzmark{lookuplegend}
+					\begin{tikzpicture}[overlay, remember picture]%
+						\node[fill=white,draw = black, align=center] at ([xshift=7cm,yshift=1.5cm]pic cs:lookuplegend) {
+							\textbf{Modifications Legend}\\
+							\HiLi{Replication}{HotDataAdd}{HotDataOutline}{0.1cm}\\
+							\HiLi{Paging}{ColdDataAdd}{ColdDataOutline}{0.1cm}
+						};%
+					\end{tikzpicture}\;
+				\end{minipage}%
+			\end{lrbox}
+			\hspace*{-10pt}\framebox[\columnwidth]{\hspace*{15pt}\usebox\mybox\par}
+			\caption{Hot Caching $lookup$ Operation at Peer $p$}
+			\label{alg:lookup}
+		\end{algorithm}
+			
+		\paragraph*{\textit{lookup} Operation}
+			
+			In the base algorithm, a core peer performs a number of actions upon receiving a $lookup$ request. 
+			First, the peer $p$ determines the closest known cluster to the destination $key$.
+			If $p$ belongs to that cluster, $p$ informs all other core peers in the cluster of the incoming request 
+			and send a return message to the cluster from which the request originated.
+			If $p$ does not belong to that cluster, $p$ forwards the message to the next closest cluster and wait for $\frac{S_{min}+1}{3}+1$ 
+			responses before returning a response to the immediate previous cluster.
+
+
+			%Pathing%
+			\tikzset{cluster/.style = {shape=circle,draw, minimum size = 1.2cm}}
+			\tikzset{node/.style = {shape=circle,draw,fill=black}}
+			\tikzset{path/.style = {-latex'}}
+			\begin{wrapfigure}{r}{0.4\columnwidth}
+				\hspace*{-0.08\linewidth}
+				\centering
+				\input{figures/REQUEST.tex}
+				\caption{Request}
+				\vspace{0.2cm}
+				\input{figures/RESPONSE.tex}
+				\label{fig:Request}
+				\captionsetup{}
+				\caption{Response to a request}
+				\label{fig:Response}
+			\end{wrapfigure}
+			
+			Figures \ref{fig:Request} and \ref{fig:Response} describe the request and response process. 
+			Figure \ref{fig:Request} shows how the requests branch and combine at each peer. 
+			A peer at cluster 00 initializes the request by sending messaged destined for cluster 11 to cluster 10. 
+			Each peer in cluster 10 then forwards the request to each peer in cluster 11.
+			Each peer in cluster 11 then responds to these requests according to figure \ref{fig:Response}.
+			Upon reception of $\frac{S_{min}+1}{3}+1$ similar messages, each peer in 11 sends a response message to each peer in cluster 10.
+			Then, each peer in 10 sends a response to the initializing peer in 00.
+			Once $\frac{S_{min}+1}{3}+1$ similar responses are received, the request is complete. 
+			All extraneous messages past $\frac{S_{min}+1}{3}+1$ are discarded.
+
+		\subparagraph*{Replication of Hot Data}
+			Hot data replication is a technique whereby data that is frequently requested is replicated to faster or closer storage to minimize lookup times.
+			A basic algorithm for implementing this is described in \cite{frank_method_2000}.
+			In essence, each peer keeps a registry of which peers requested the data in recent time.
+			If a peer requests data more than $T_{cache}$ times in the time frame $T_{replicate} \cdot \mathcal{H}(p, origin)$, 
+			the peer is added to the registry $RH_{cache}$ so that each new update to the data also updates the replicated data.
+			In order to implement this improvement, the \textit{lookup} operation was modified as such
+			(\HiLi{highlighted}{HotDataAdd}{HotDataOutline}{0.1cm} in figure \ref{alg:lookup}):
+			
+
+			The first modification is such that $lookup$ requests record transit history. 
+			This is so that the peers in the owner cluster of $key$ can count how many times each cluster has requested $key$. 
+			This count is maintained in the Request Handler for Replication Counting ($p$.RHRC[$key$, $\mathcal{C}$.Label]). 
+			The second modification makes each peer check a threshold for replication of $key$ to each $cluster$ in $transithistory$. 
+			When the threshold $T_{replicate}$ is reached on any element in $p$.RHRC, $p$ issues a special $replicate$ request to all core 
+			members of that cluster.
+
+			\begin{wrapfigure}{R}{0.4\columnwidth}
+				\hspace*{-0.08\linewidth}
+				\centering
+				\input{figures/4HPRE.tex}
+				\caption{Replication routing}
+				\label{fig:preempt}
+			\end{wrapfigure}			
+			
+			Peer $p$ also maintains the Replication Mapping Handler ($p$.RMH) such that 
+			$p.$RMH[$\mathcal{C}$.Label] is the set of keys 
+			replicated in $\mathcal{C}$.
+			This state is important for updating the replications on subsequent $put$ requests.
+			When data is replaced via a $put$ request or removed via a $delete$ request, all replicated data stored in other clusters is also replaced or removed.
+			The state information that allows this is stored in $p$.RHRM.
+			
+			Figure \ref{fig:preempt} illustrates how the replication system preempts the standard structure of the hypercube. 
+			The red line represents a replication of some data at $key$ between two usually unlinked clusters. 
+			Any $lookup$ for $key$ that passes through the replicated store short-circuits and return the data for $key$.
+			This preemption of the standard structure of the DHT allows for a shortened path to the requested data.
+			
+
+		\subparagraph*{Paging}
+		
+		In the base implementation of the algorithm all data is stored in memory. 
+		This is fine for small amounts of data, but unsustainable for a larger data-store.
+		Paging would solve this issue by offloading infrequently accessed data to the disk, freeing memory space for more frequently accessed data.
+		This is a simple modification to implement. 
+		The choice to offload data to disk can be entirely local as it does not meaningfully affect the state of the network as a whole.
+		Each peer counts how often each piece of data is requested. 
+		If a particular datum falls below a threshold $T_{page}$, it is offloaded to temporary disk space.
+		
+		
+\subsection*{Simulation Procedures}
+	The simulation attempts to closely mimic actual network traffic. 
+	The boundaries between peers are respected, and all data transfered between peers is copied. 
+	The network transactions are simulated asynchronously. 
+	The simulation is extremely similar to a real-world implementation of the algorithm,
+	only with all network calls replaced by randomly delayed queues with a chance for failure or timeouts. 
+	This chance is randomly defined by constraints $P_{success}$ and $P_{timeout}$, which are constant for this simulation, 
+	but may vary in future investigations. 
+	The simulation also maintains a global state of the network so that further analysis into the inner workings of the network may be done. 
+	Seeing as how this simulation is not a real-world test, only the relative performance of the various configurations is significant. 
+	The absolute magnitude is largely irrelevant and almost entirely dependent on the testing hardware.
+
+	Malicious peers are simulated as purely non-functional for the purposes of this simulation. 
+	They are not a primary focus of the investigation, and as such, their impacts are largely assumed to be similar to that of a failing node. 
+	Further investigations into the behaviors of the DHT with properly malicious nodes of various degrees may be conducted at a later date.
+
+	\begin{wraptable}{L}{0.4\textwidth}
+		\caption{Simulation configurations}
+		\label{table:Configs}
+		\centering
+		\footnotesize
+		\begin{tabular}{ | c | c | c |}
+			\hline
+			$\mu$ & Workers & Configuration \\ 
+			\hline\hline
+			0\% & 1 & Default \\
+			\hline
+			5\% & 2 & Caching \\
+			\hline
+			10\% & 4 & Paging \\
+			\hline
+			20\% & 8 & Caching and Paging \\
+			\hline
+		\end{tabular}
+	\end{wraptable}
+
+	The simulations conducted covered the 64 distinct cases described in table \ref{table:Configs}.
+	$\mu$ is the percentage of malicious peers in the network. 
+	Considering the limitations of maintaining this exact percentage while cycling peers in and out of the network, 
+	$\mu$ was approximated as the chance each new peer has to be malicious. Seeing as peers are randomly chosen to leave the network, 
+	this approach maintains $\mu$ at approximately the intended value.
+
+	
+	For the purposes of the simulation, peers were then added at a semi-constant rate of about $1 \frac{peers}{second}$.
+	Roughly $1\%$ of all peers were removed each 10 second period. Data collection began once the network reached an equilibrium. 
+	A random sequence of $put$ and $lookup$ requests were sent to random nodes in the network. 
+	Every minute for 30 minutes, the network was paused and data on requests per second and 95th percentile latency were collected.
+	95th percentile latency was chosen to measure relative worst-case performance while not being too susceptible to temporary spikes in latency.
+	After the 10 minutes, the results of each minute of observation were averaged.
+	
+
+\section*{Results}
+
+	\hspace{-0.75cm}
+	\begin{minipage}{0.95\textwidth}
+	\vspace{-0.15cm}
+	\centering
+	\begin{multicols}{2}
+		\begin{graph}[H]%
+			\centering%
+			\input{figures/graphDefaultMeanRPS.tex}%
+		\end{graph}%
+		\begin{graph}[H]%
+			\centering%
+			\input{figures/graphDefaultMean95L.tex}%
+		\end{graph}%
+	\end{multicols}
+	\vspace{0.3cm}
+	\end{minipage}
+
+
+	Graphs \ref{graph:DefaultMeanRPS} and \ref{graph:DefaultMean95L} present the mean of 10 minutes of data collected for each of 16 simulations. 
+	Graph \ref{graph:DefaultMeanRPS} is the mean number of requests per second on the base configuration.
+	It shows decreases with respect to $\mu$, the percentage of malicious peers, and an increase with respect to the number of worker threads per peer.
+	Graph \ref{graph:DefaultMean95L} is the mean of the 95th percentile latency measurements collected each minute for 10 minutes on the base configuration. 
+	It shows an exponential increase in latency with respect to $\mu$ and a decrease in latency with respect to the number of worker threads per peer.
+
+	\hspace{-0.75cm}
+	\begin{minipage}{0.95\textwidth}
+	\vspace{-0.15cm}
+	\begin{multicols}{2}
+		\begin{graph}[H]%
+			\centering%
+			\input{figures/graph0MuMeanRPS.tex}%
+		\end{graph}%
+		\begin{graph}[H]%
+			\centering%
+			\input{figures/graph0MuMean95L.tex}%
+		\end{graph}%
+	\end{multicols}
+	\vspace{0.3cm}
+	\end{minipage}
+	
+	Graphs \ref{graph:0MuMeanRPS} and \ref{graph:0MuMean95L} show the relative 
+	performance of the various configurations of the algorithm with respect to the number of worker threads $w$. 
+	The algorithm with replication showed between $6\%$ and $30\%$ lower latency than the base configuration, depending on the number of worker threads.
+	Replication also demonstrated a $22\%$ increase in the number of requests per second over the base configuration. 
+	Paging alone resulted in slight decreases in performance across the board. 
+	95th percentile latency increased by between $1.7\%$ and $3.1\%$ and the number of requests per second decreased by $3.2\%$ to $5.9\%$ 
+	from the default configuration. 
+	The combined configuration of replication and paging shows between a $1.2\%$ and a $20\%$ decrease in 
+	latency and a $18\%$ to $21\%$ increase in the number of requests per second.
+
+	\hspace{-0.75cm}
+	\begin{minipage}{0.95\textwidth}
+	\vspace{-0.15cm}
+	\begin{multicols}{2}
+		\begin{graph}[H]%
+			\centering%
+			\input{figures/graph1WMeanRPS.tex}%
+		\end{graph}%
+		\begin{graph}[H]%
+			\centering%
+			\input{figures/graph1WMean95L.tex}%
+		\end{graph}%
+	\end{multicols}
+	\vspace{0.3cm}
+	\end{minipage}
+
+	Graphs \ref{graph:1WMeanRPS} and \ref{graph:1WMean95L} displays the relative 
+	performance of the various configurations of the algorithm with respect to $\mu$. 
+	All of the configurations showed exponential increases in latency with respect to $\mu$.
+	The replication and combined configurations had relatively lower latency and higher performance than the base configuration for all values of $\mu$ 
+	while the paging configuration had relatively higher latency and slightly lower performance.
+
+
+\section*{Discussion}
+
+	The results of the investigation support the objectives of the project: to improve the performance of a particular DHT while maintaining some key characteristics. 
+	Reference \cite{anceaume_peercube:_2008} presents models for the probability of request success  of PeerCube as it relates to $\mu$. 
+	These models project an exponential decay in the probability of request success. 
+	The exponential increase of the latency with respect to $\mu$, as shown in graph \ref{graph:DefaultMean95L}, 
+	is consistent with the previous PeerCube simulation findings. The previous finding are within the results of the simulation (with 95\% confidence when compared on a normalized scale of 0-1).
+	This would imply that the algorithm was implemented correctly in the simulation.
+	
+	The inconsistent relative change with respect to the number of worker threads per peer in graphs 
+	\ref{graph:0MuMeanRPS} and \ref{graph:0MuMean95L} can explained as issues with single-threadedness.
+	With just one thread, thread safe operations, such as $lookup$, cannot run in parallel. 
+	This means that every $lookup$ pauses the network for the length of the request.
+	This would also imply that the overhead of supporting operations ($lookupreturn$,$lookupinform$,$replicate$) is significant (non-negligible, (p<0.05)),
+	but mitigated by parallel processing.
+	Together, these two factors explain why the single threaded replication configuration performed relatively worse than expected compared to the multithreaded replication configurations.
+	
+	The overall performance of the replication configurations is unsurprising. 
+	Data requested from similar $lookup$ operations are replicated closer to the requester, so latency would tend to be much lower. 
+	Also, with lower latency and travel distance, 
+	fewer peers spend less time waiting for responses, 
+	so the peers have more time on average to serve other requests. 
+	And so requests per second would be higher on average.
+	The results support that these differences in latency and requests per second are significant (p<0.05).
+
+	The relative performance of the paging configurations was also as expected.
+	Writing and reading from hard-disks, even simulated ones, takes time and CPU time.
+	As such, a paging peer would perform more slowly, yet use less memory to store the same amount of data. 
+	The results of the combined approach were similarly expected.
+	Replication had a more significant positive effect on performance than the negative effect of paging ($\Delta rps_{rep}>-\Delta rps_{page}$, $\Delta latency_{rep}>-\Delta latency_{page}$, p<0.05).
+	As such, the combined approach performed strictly better than the base configuration.
+
+	The results of the simulations with respect to the number of worker threads was somewhat unexpected.
+	An increase in the number of requests per second was expected, but this increase was expected to be somewhat higher.
+	The increase was significantly less than linear with respect to the number of threads ($R^2=0.3$).
+	This may have been due to all of the non-threadsafe operations pausing the worker threads.
+	Further investigation with granular measurements of operation type and time would be required to determine if this is the case.
+	This may also have been due to physical processing constraints in the simulation environment.
+	The execution of thousands of green threads may have reached the limits of the testing environment.
+	Further testing on more robust hardware may be necessary.
+
+	All of the simulation configurations performed appropriately with respect to $\mu$.
+	Each configuration experiences slow exponential growth in latency with respect to $\mu$. 
+	This is not a hugely positive outcome, but this still suggests that most requests completed successfully.
+	
+	Overall, the investigation validated that hot data replication is applicable to peer-to-peer overlays and effective in reducing latency. 
+	The investigation also demonstrated that the paging of data results in relatively insignificant performance degradation 
+	for a relatively larger decrease in memory usage.
+
+
+
+
+
+%-------------------------------------------------------------------------------
+% REFERENCES
+%-------------------------------------------------------------------------------
+\clearpage{}
+\section**{References}
+\footnotesize
+\bibliographystyle{IEEEtranS}
+\begingroup\def\chapter*#1{}
+\bibliography{./bib}
+\endgroup
+
+
+\end{document}
+
+%-------------------------------------------------------------------------------
+% SNIPPETS
+%-------------------------------------------------------------------------------
+
+%\begin{figure}[!ht]
+%	\centering
+%	\includegraphics[width=0.8\textwidth]{file_name}
+%	\caption{}
+%	\centering
+%	\label{label:file_name}
+%\end{figure}
+
+%\begin{figure}[!ht]
+%	\centering
+%	\includegraphics[width=0.8\textwidth]{graph}
+%	\caption{Blood pressure ranges and associated level of hypertension (American Heart Association, 2013).}
+%	\centering
+%	\label{label:graph}
+%\end{figure}
+
+%\begin{wrapfigure}{r}{0.30\textwidth}
+%	\vspace{-40pt}
+%	\begin{center}
+%		\includegraphics[width=0.29\textwidth]{file_name}
+%	\end{center}
+%	\vspace{-20pt}
+%	\caption{}
+%	\label{label:file_name}
+%\end{wrapfigure}
+
+%\begin{wrapfigure}{r}{0.45\textwidth}
+%	\begin{center}
+%		\includegraphics[width=0.29\textwidth]{manometer}
+%	\end{center}
+%	\caption{Aneroid sphygmomanometer with stethoscope (Medicalexpo, 2012).}
+%	\label{label:manometer}
+%\end{wrapfigure}
+
+%\begin{table}[!ht]\footnotesize
+%	\centering
+%	\begin{tabular}{cccccc}
+%	\toprule
+%	\multicolumn{2}{c} {Pearson's correlation test} & \multicolumn{4}{c} {Independent t-test} \\
+%	\midrule	
+%	\multicolumn{2}{c} {Gender} & \multicolumn{2}{c} {Activity level} & \multicolumn{2}{c} {Gender} \\
+%	\midrule
+%	Males & Females & 1st level & 6th level & Males & Females \\
+%	\midrule
+%	\multicolumn{2}{c} {BMI vs. SP} & \multicolumn{2}{c} {Systolic pressure} & \multicolumn{2}{c} {Systolic Pressure} \\
+%	\multicolumn{2}{c} {BMI vs. DP} & \multicolumn{2}{c} {Diastolic pressure} & \multicolumn{2}{c} {Diastolic pressure} \\
+%	\multicolumn{2}{c} {BMI vs. MAP} & \multicolumn{2}{c} {MAP} & \multicolumn{2}{c} {MAP} \\
+%	\multicolumn{2}{c} {W:H ratio vs. SP} & \multicolumn{2}{c} {BMI} & \multicolumn{2}{c} {BMI} \\
+%	\multicolumn{2}{c} {W:H ratio vs. DP} & \multicolumn{2}{c} {W:H ratio} & \multicolumn{2}{c} {W:H ratio} \\
+%	\multicolumn{2}{c} {W:H ratio vs. MAP} & \multicolumn{2}{c} {\% Body fat} & \multicolumn{2}{c} {\% Body fat} \\
+%	\multicolumn{2}{c} {} & \multicolumn{2}{c} {Height} & \multicolumn{2}{c} {Height} \\
+%	\multicolumn{2}{c} {} & \multicolumn{2}{c} {Weight} & \multicolumn{2}{c} {Weight} \\
+%	\multicolumn{2}{c} {} & \multicolumn{2}{c} {Heart rate} & \multicolumn{2}{c} {Heart rate} \\
+%	\bottomrule
+%	\end{tabular}
+%	\caption{Parameters that were analysed and related statistical test performed for current study. BMI - body mass index; SP - systolic pressure; DP - diastolic pressure; MAP - mean arterial pressure; W:H ratio - waist to hip ratio.}
+%	\label{label:tests}
+%\end{table}

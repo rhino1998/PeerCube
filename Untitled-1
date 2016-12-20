@@ -1,0 +1,260 @@
+Here are the completed comments (continuing at *****).
+
+--------------------------------------------------------------------------------------------
+This version is closer to what is needed.
+But it is still quite vague and seems to have many inconsistencies.
+
+----------------------------------------------------------------------
+Henceforth, let's use plain text for the algorithm (no latex, no word).
+It's much easier for giving feedback and making incremental progress.
+----------------------------------------------------------------------
+| 1.1 Constants
+
+| N: the network itself. It contains clusters of peers.
+
+Ambiguous.
+Is N a set of clusters (whatever a cluster is)?
+Isn't N an integer?
+
+| m: length of an id. 2^m is the maximum number of clusters.
+
+Aren't keys also m-bit words?
+If so, isn't 2^m the set of all possible peer ids and keys.
+It may also be the maximum number of clusters, but a network where
+this is the case cannot store any objects. Correct?
+
+| S_max: max size of a cluster. (2^m * S_max) is the max number of peers.
+
+Can the number of peers exceed 2^m?
+
+----------------------------------------------------------------------
+| 1.2 Globals
+
+| Peers: set of all peers in N.
+
+Is an element of Peers an id (m-bit word).
+Or is it a peer instance (ie, state of its vars, functions, and threads).
+[From "forall p in Peers: |p.RT} = m ..." in Starting State section,
+and from section 1.6, it seems that the latter is the case.
+But then "Peers is constant" in Assertions section does not hold.]
+
+| Clusters: set of all clusters in N.
+
+Same issues as with Peers.
+Is an element of Clusters a word or a Cluster instance.
+
+----------------------------------------------------------------------
+| 1.3 Starting State
+
+The statements involving Peers should come with or after the definition
+of Peer (section 1.6).
+
+| forall p in Peers: p.RT = b_0, ..., b_{m-1}
+
+Obviously this is not sufficient.
+For example, it allows the routes formed by the peer RTs to be a loop,
+or to all point to the same m-bit string (which may not even be the
+id of a peer).
+
+----------------------------------------------------------------------
+| 1.4 Functions
+
+Most of this section is not needed.
+
+PREFIX(A,B) is standard and simple enough that a formal defn is not needed.
+Just use it in plain english, eg, "A is a prefix of B" or "A prefixof B".
+
+Same with RANDOMBOOL().
+
+HASH(v) and GENID are the same.
+So just use one of them. The norm is to use a hash function,
+say hash(v), and assume that it returns a sufficiently random word.
+
+So all you need is the defn of D(A,B).
+
+----------------------------------------------------------------------
+| 1.5 Key
+
+| Keys are used to ... network.
+Remove it from here. Belongs in an informal desccription of the algorithm
+(which should precede this "formal" description).
+
+| 1.5.1 Attributes
+| str: ...
+
+Is the distinction between k and k.str needed here?
+Is it needed in the implemenation program, except for printing k?
+
+| id := hash(k.str)
+
+Finally, a concrete confusion.
+I thought a key is an m-bit word (and doesn't need to be converted to it).
+For example, the paper says (pdf page 7):
+  Each application-specific object, or data-item, of the system is
+  assigned a unique identifier, called key, selected from the same
+  m-bit identifier space.
+
+----------------------------------------------------------------------
+| 1.6 Peer p
+
+| 1.6.1
+| id := GenId ... non-unique identifier ...
+It is a unique identifier. For example, pdf page 9:
+  As stated before, each joining peer is assigned a unique random ID
+  from an m-bit identifier space
+
+| cluster: p belongs to exaclty one cluster.
+Still no idea what is a cluster.
+
+| RT: ... p.RT_i = C <=> [forsome C: C.label = b_0 ...bar(b_i)...b_{m-1}]
+
+This does not make sense.
+
+There are two 'C's above:
+ - one to <=>'s lhs (left hand side)
+ - one to <=>'s rhs (right hand side)
+They are different: the one at right is a bound variable (ranging over
+the set of clusters in the network, right?). So it could be replaced
+by say 'D'.
+
+Without the "bar(b_i)", this is pretty vacuous, saying only that
+p.RT_i equals the label of some cluster (so allowing loops, all pointing
+to the same entry, etc).
+
+With the "bar(b_i)", it is not vacuous but it says:
+  for every peer p:
+   p.RT_i is a m-bit word such that
+    for some cluster D in the network, D.label equals p.RT_i except
+    in one bit.
+This need not hold if the network does not have all possible clusters.
+If the network has all possible clusters (2^m of them?), does it say
+anything nontrivial?
+
+************* continuing where I left off before *************
+
+How is C.label defined.
+I guess that C.label is some prefix of the peer ids of C.
+Is it the maximal prefix?
+
+I'm pretty sure now that your cluster is not a set of peers.
+If it is, "p.RT_i = C" makes no sense.
+Is your cluster is a set of addresses?
+Even then "p.RT_i = C" seems odd. The entry would be a set of addresses?
+Is p.RT_i a cluster's label (however that is defined).
+Or is it the address of a core peer?
+
+| RHC: ... RHC[key] defaults to -1.
+
+Here, is 'key' 'key.id' or 'key.str'?
+RHC seems to be a map over keys.
+Initially is the map empty?
+Or does it have an entry for every key in DataStore?
+Does 'defaults to -1' mean that the entry is initially -1?
+
+| RHD: ... RHD[key] defaults to nil.
+Same questions as with RHC.
+
+| DataStore: DataStore[string] = some value ... nil.
+Should string be key, or more accurately, key.id, and not key.str?
+Defaults to nil doesn't make sense.
+Is the DataStore an empty map at the start?
+
+----------------------------------------------------------------------
+| 1.6.2
+
+| function Lookup(key)
+| assume: no ongoing lookup operations for key, p.RHC[key.str] = -1.
+
+This assume is really an assertion.
+
+We can assume that a peer has at most one ongoing lookup for a key.
+But different peers may have simultaneous ongoing lookups for the same key;
+eg, both are looking for the value of the same key.str.
+
+"p.RHC[key.str] = -1" is not an assumption (of the environment).
+Rather it should be a property of the algorithm.
+
+| forall phi in R_c subsetof C.V_c | |R_c| = (S_min ...) do
+| send(LOOKUP, key, p, p) to phi
+
+Is C.V_c an attribute of peer p?
+Should it be just V_c. (Isn't C here p.cluster?)
+If there are two subsets, say X and Y, of C.V_c, and they have
+a peer z in common, then z will get at least two copies of the msg.
+
+| wait until ...
+So this function is not a helper function,
+but rather an input function called by the peer's environment,
+in this case, the peer's local user?
+
+----------------------------------------------------------------------
+| 1.6.4
+| if (LOOKUP, key, origin, prev) received from N
+
+This is another input function, called when p receives a LOOKUP msg.
+
+| assume: No ongoing lookup operations for key.
+
+As mentioned above, this is per origin, and not network-wide.
+
+----------------------------------------------------------------------
+| 1.7 Cluster C
+| The network contains an arbitrary number of peers.
+
+The network has a set of peers, each with a unique id.
+The set of ids are a subset of the set of all m-bit words.
+
+| 1.7.1
+| label: A unique identifier for C.
+|    not forsome C' | C'.label prefixof C.label
+
+This would not hold if there are 2^m clusters in the network.
+
+----------------------------------------------------------------------
+
+Overall.
+
+Perhaps first get the peer defined.
+All its attributes and input functions.
+
+Then state the global conditions on the initial state of the network.
+
+Given a set of peer ids and a set of initial keys,
+can there be more than one possible initial configurations of clusters?
+
+----------------------------------------------------------------------
+
+--------------------------------------------------------------------------------------------
+
+On Wed, Aug 24, 2016 at 2:54 PM, Riley Wilburn <jamesrileywilburn@gmail.com> wrote:
+
+Key.id is equivalent to key as defined in the paper for routing, key.str only applies to endpoints
+On Aug 24, 2016, at 2:53 PM, Riley Wilburn <jamesrileywilburn@gmail.com> wrote:
+
+In actual usage, key.str would conform to some standard, such as [project].[subproject]...[name] 
+
+
+On Aug 24, 2016, at 2:49 PM, Riley Wilburn < jamesrileywilburn@gmail.com> wrote: 
+
+In my implementation, key.str is plain English, so uniqueness has to be assumed, it cannot be assured. 
+On Aug 24, 2016, at 1:34 PM, Udaya Shankar < shankar@cs.umd.edu> wrote: 
+It's clear from the paper that m is large (128-bit output of hash function MD5), and that the number of peers, objects, clusters is much smaller than 2^m. This is the case in all DHTs. 
+
+It's fine if you want to have key.str unique and key.id non-unique, but to be consistent with the paper (and DHTs in general), your key.str should be the equivalent of the paper's key. So peer ids and key.str should be the same large size. 
+
+In your implementation, how is uniqueness of key.str achieved? 
+
+On Wed, Aug 24, 2016 at 1:00 PM, Riley Wilburn <jamesrileywilburn@gmail.com> wrote: 
+Not at a computer right now, but allowing id's to be non unique allows small values of m to create valid networks that can also have 2^m clusters (each with at least smin peers with identical id's) that can store objects. 
+Having key.str and key.id be separate values, deals with hash collisions nicely. Key.str is assumed unique, while key.id is not necessarily unique. 
+This is obviously a modification on the original, but it is much easier to implement. 
+On Aug 24, 2016, at 12:44 PM, Udaya Shankar < shankar@cs.umd.edu> wrote: 
+Attached are comments on sections 1-5. Comments on the rest later. 
+
+
+On Tue, Aug 23, 2016 at 8:32 AM, <jamesrileywilburn@gmail.com> wrote: 
+I realized I was missing a very important statement in ‘LOOKUPRETURN’. I’ll just link to the pdf on my github. https://github.com/rhino1998/peercube/blob/master/latex/basic.pdf 
+\
+  
+
+

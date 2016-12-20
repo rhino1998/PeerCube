@@ -1,0 +1,43 @@
+\documentclass[border=1mm,
+               class=article
+               preview]{standalone}
+
+
+\begin{document}
+	\pgfdeclarelayer{bg}    % declare background layer
+	\pgfsetlayers{bg,main}  % set the order of the layers (main is the standard layer)
+	\tikzset{cluster/.style = {shape=circle,draw, minimum size = 1.2cm}}
+	\tikzset{node/.style = {shape=circle,draw,fill=black}}
+	\tikzset{path/.style = {latex-latex'}}
+	\begin{tikzpicture}[scale=2.25]
+		\node[cluster,scale=1] (b0) at (0,0){\scriptsize{00}};%
+		\node[cluster,scale=1] (b1) at (0,1){\scriptsize{01}};%
+		\node[cluster,scale=1] (b2) at (1,0){\scriptsize{10}};%
+		\node[cluster,scale=1] (b3) at (1,1){\scriptsize{11}};%
+		\node[node,scale=0.5] (b0a) at (0.08,0.08){};%
+		\node[node,scale=0.5] (b0b) at (0.08,-0.08){};%
+		\node[node,scale=0.5] (b0c) at (-0.08,0.08){};%
+		\node[node,scale=0.5] (b0d) at (-0.08,-0.08){};%
+		\node[node,scale=0.5] (b0e) at (0.16,0){};%
+		\node[node,scale=0.5] (b0f) at (-0.16,0){};%
+		\node[node,scale=0.5] (b0g) at (0,-0.16){};%
+		\node[node,scale=0.5] (b1a) at (0.08,1.08){};%
+		\node[node,scale=0.5] (b1b) at (0.08,1-0.08){};%
+		\node[node,scale=0.5] (b1c) at (-0.08,1.08){};%
+		\node[node,scale=0.5] (b1d) at (-0.08,1-0.08){};%s
+		\node[node,scale=0.5] (b2a) at (1.08,0.08){};%
+		\node[node,scale=0.5] (b2b) at (1.08,-0.08){};%
+		\node[node,scale=0.5] (b2c) at (1-0.08,0.08){};%
+		\node[node,scale=0.5] (b2d) at (1-0.08,-0.08){};%
+		\node[node,scale=0.5] (b3a) at (1.08,1.08){};%
+		\node[node,scale=0.5] (b3b) at (1.08,1-0.08){};%
+		\node[node,scale=0.5] (b3c) at (1-0.08,1.08){};%
+		\node[node,scale=0.5] (b3d) at (1-0.08,1-0.08){};%
+
+		\draw[path] (b0) to (b1);
+		\draw[path] (b0) to (b2);
+		\draw[path] (b2) to (b3);
+		\draw[path] (b1) to (b3);
+	\end{tikzpicture}
+
+\end{document}

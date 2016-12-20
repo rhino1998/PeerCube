@@ -1,0 +1,50 @@
+\documentclass[border=1mm,
+               class=article
+               preview]{standalone}
+
+
+\begin{document}
+	\pgfdeclarelayer{bg}    % declare background layer
+	\pgfsetlayers{bg,main}  % set the order of the layers (main is the standard layer)
+	\tikzset{cluster/.style = {shape=circle,draw, minimum size = 1.2cm}}
+	\tikzset{node/.style = {shape=circle,draw,fill=black}}
+	\tikzset{path/.style = {latex-latex'}}
+	\begin{tikzpicture}[scale=2.25]
+		\node[cluster,scale=1] (a000) at (0,0,0){\scriptsize{000}};%
+		\node[cluster,scale=1] (a001) at (0,0,1.2){\scriptsize{001}};%
+		\node[cluster,scale=1] (a010) at (0,1){\scriptsize{01}};%
+		\node[cluster,scale=1] (a100) at (1,0){\scriptsize{10}};%
+		\node[cluster,scale=1] (a110) at (1,1){\scriptsize{11}};%
+		\node[node,scale=0.5] (a00a) at (0.08,0.08){};%
+		\node[node,scale=0.5] (a00b) at (0.08,-0.08){};%
+		\node[node,scale=0.5] (a00c) at (0-0.08,0.08){};%
+		\node[node,scale=0.5] (a00d) at (0-0.08,-0.08){};%
+		\node[node,scale=0.5] (a01a) at (0.08,0.08,1.2){};%
+		\node[node,scale=0.5] (a01b) at (0.08,-0.08,1.2){};%
+		\node[node,scale=0.5] (a01c) at (0-0.08,0.08,1.2){};%
+		\node[node,scale=0.5] (a01d) at (0-0.08,-0.08,1.2){};%
+		\node[node,scale=0.5] (a1a) at (0.08,1.08){};%
+		\node[node,scale=0.5] (b1b) at (0.08,1-0.08){};%
+		\node[node,scale=0.5] (b1c) at (0-0.08,1.08){};%
+		\node[node,scale=0.5] (b1d) at (0-0.08,1-0.08){};%s
+		\node[node,scale=0.5] (b2a) at (1.08,0.08){};%
+		\node[node,scale=0.5] (b2b) at (1.08,-0.08){};%
+		\node[node,scale=0.5] (b2c) at (1-0.08,0.08){};%
+		\node[node,scale=0.5] (b2d) at (1-0.08,-0.08){};%
+		\node[node,scale=0.5] (b3a) at (1.08,1.08){};%
+		\node[node,scale=0.5] (b3b) at (1.08,1-0.08){};%
+		\node[node,scale=0.5] (b3c) at (1-0.08,1.08){};%
+		\node[node,scale=0.5] (b3d) at (1-0.08,1-0.08){};%
+
+		\draw[path] (a000) to (a001);
+		\draw[path] (a000) to (a010);
+		\draw[path] (a000) to (a100);
+		\draw[path] (a001) to (a010);
+		\draw[path] (a001) to (a100);
+		\draw[path] (a010) to (a110);
+		\draw[path] (a100) to (a110);
+
+	
+	\end{tikzpicture}
+
+\end{document}

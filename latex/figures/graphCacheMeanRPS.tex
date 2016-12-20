@@ -1,0 +1,57 @@
+\documentclass[border=1mm,
+               class=article
+               preview]{standalone}
+
+
+\begin{document}
+	\resizebox{\columnwidth}{!}{
+		\pgfdeclarelayer{bg}    % declare background layer
+		\pgfsetlayers{bg,main}  % set the order of the layers (main is the standard layer)
+		\tikzset{cluster/.style = {shape=circle,draw, minimum size = 1.2cm}}
+		\tikzset{node/.style = {shape=circle,draw,fill=black}}
+		\tikzset{path/.style = {-latex'}}
+		\begin{tikzpicture}[scale=1]
+			\begin{axis}[
+			title={\caption{Mean Requests per Second\\(Replication)}\label{graph:CacheMeanRPS}}, 
+			title style={yshift=2.5ex,text width=8cm, align=center},
+				xlabel={Number of worker threads per peer},
+				ylabel={Requests per second},
+				ybar,
+				legend style={at={(1,1.13)},legend columns=-1, font=\footnotesize},
+				legend cell align=center,
+				legend image post style={xscale=2.2},
+				bar width=6pt,
+				xtick=data,
+				xticklabels from table={\cacheAVG}{Config},
+				ymin=0,
+				xmin=-1,
+				restrict y to domain=<0>:<5000>,
+				xmajorgrids=true,
+				x tick label style={rotate=0,anchor=north,font=\footnotesize, align=center},
+				y tick label style={rotate=0},
+			]
+			\addplot[style={ppurple,fill=ppurple}] table [x expr=\coordindex,y=m0RPS,col sep=comma] {\cacheAVG};
+			\addplot[style={bblue,fill=bblue}] table [x expr=\coordindex,y=m5RPS,col sep=comma] {\cacheAVG};
+			\addplot[style={ggreen,fill=ggreen}] table [x expr=\coordindex,y=m10RPS,col sep=comma] {\cacheAVG};
+			\addplot[style={rred,fill=rred}] table [x expr=\coordindex,y=m20RPS,col sep=comma] {\cacheAVG};
+			\foreach \i in {0,1,...,3}{ % category loop
+				\pgfplotstablegetelem{\i}{m0RPS}\of\cacheAVG
+				\pgfmathsetmacro{\ya}{\pgfplotsretval}
+				\pgfplotstablegetelem{\i}{m5RPS}\of\cacheAVG
+				\pgfmathsetmacro{\yb}{\pgfplotsretval}
+				\pgfplotstablegetelem{\i}{m10RPS}\of\cacheAVG
+				\pgfmathsetmacro{\yc}{\pgfplotsretval}
+				\pgfplotstablegetelem{\i}{m20RPS}\of\cacheAVG
+				\pgfmathsetmacro{\yd}{\pgfplotsretval}
+
+				\pgfmathsetmacro{\xa}{\i+0}
+				\pgfmathsetmacro{\xb}{\i+0.2}
+				\pgfmathsetmacro{\xc}{\i+0.4}
+				\pgfmathsetmacro{\xd}{\i+0.6}
+				\addplot[draw=black,ultra thick,smooth,shift={(-1.28,0)}] coordinates {(\xa,\ya) (\xb,\yb) (\xc,\yc) (\xd,\yd)};
+			}
+			\legend{$\mu = 0\%$,$\mu = 5\%$,$\mu = 10\%$,$\mu = 20\%$};
+			\end{axis}
+		\end{tikzpicture}
+	}
+\end{document}

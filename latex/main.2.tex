@@ -1,0 +1,640 @@
+
+\documentclass[apa6]{IEEEtran}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{blindtext}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepackage{amsthm}
+\usepackage{fontspec}
+\usepackage{standalone}
+\usepackage{fixltx2e}
+\usepackage{filecontents}
+\usepackage{caption,setspace}
+\usepackage{scrextend}
+\usepackage{algorithmicx}
+\usepackage[figure]{algorithm2e} 
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+\pgfplotsset{compat=1.11,
+        /pgfplots/ybar legend/.style={
+        /pgfplots/legend image code/.code={%
+        %\draw[##1,/tikz/.cd,yshift=-0.25em]
+                %(0cm,0cm) rectangle (3pt,0.8em);},
+        \draw[##1,/tikz/.cd,bar width=3pt,yshift=-0.2em,bar shift=0pt]
+                plot coordinates {(0cm,0.8em)};},
+},
+}
+
+\setmainfont{Tiempo}
+
+\newsavebox\mybox
+\theoremstyle{plain}
+\newtheorem{property}{Property}
+\newtheorem{definition}{Definition}
+\usepackage{cite}
+
+
+
+
+
+
+
+
+\usepackage{mdwmath}
+\usepackage{mdwtab}
+
+
+
+
+
+\usepackage{stfloats}
+
+
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+
+\begin{document}
+
+%
+% paper title
+% can use linebreaks \\ within to get better formatting as desired
+\title{Improving a Hypercube-Structured Distributed Hash Table Using Assertional Reasoning}
+%
+%
+% author names and IEEE memberships
+% note positions of commas and nonbreaking spaces ( ~ ) LaTeX will not break
+% a structure at a ~ so this keeps an author's name from being broken across
+% two lines.
+% use \thanks{} to gain access to the first footnote area
+% a separate \thanks must be used for each paragraph as LaTeX2e's \thanks
+% was not built to handle multiple paragraphs
+%
+
+\author{%
+		James~R.~Wilburn% <-this % stops a space
+        }
+
+
+
+\markboth{Improving a Hypercube DHT}{Improving a Hypercube DHT}
+
+
+
+% make the title area
+\maketitle
+\definecolor{bblue}{HTML}{4F81BD}
+\definecolor{rred}{HTML}{C0504D}
+\definecolor{ggreen}{HTML}{9BBB59}
+\definecolor{ppurple}{HTML}{9F4C7C}
+\pgfplotstableread[col sep=comma]{data/caching.csv}\datatable
+
+\begin{abstract}
+%\boldmath
+This project uses assertional reasoning to evaluate the properties of the PeerCube\cite{anceaume_peercube:_2008} algorithm and modifies the algorithm to improve performance.  This is accomplished by identifying core properties of the algorithm. Once identified, these properties are maintained in the implementation even after modification. The major modifications to functionality include improved caching of data and mirroring of hot data to local nodes to minimize lookup times and the paging of infrequently accessed data to minimize memory footprint. Simulation of the proposed modifications verifies that these improvements preserve correctness while enhancing functionality.
+\end{abstract}
+% IEEEtran.cls defaults to using nonbold math in the Abstract.
+% This preserves the distinction between vectors and scalars. However,
+% if the journal you are submitting to favors bold math in the abstract,
+% then you can use LaTeX's standard command \boldmath at the very start
+% of the abstract to achieve this. Many IEEE journals frown on math
+% in the abstract anyway.
+
+% Note that keywords are not normally used for peerreview papers.
+\begin{IEEEkeywords}
+PeerCube\cite{anceaume_peercube:_2008}, hypercube, distributed hash table, assertional reasoning
+\end{IEEEkeywords}
+
+
+
+
+
+
+% For peer review papers, you can put extra information on the cover
+% page as needed:
+% \ifCLASSOPTIONpeerreview
+% \begin{center} \bfseries EDICS Category: 3-BBND \end{center}
+% \fi
+%
+% For peerreview papers, this IEEEtran command inserts a page break and
+% creates the second title. It will be ignored for other modes.
+\IEEEpeerreviewmaketitle
+
+
+
+\section{Introduction}
+Peer-to-peer systems are a popular method of providing relatively high-performance file and data storage with minimal investment. As such, numerous peer-to-peer overlays have been developed (e.g. CAN\cite{ratnasamy_scalable_2001}, Chord\cite{stoica_chord:_2001}, Tapestry \cite{zhao_tapestry:_2001}, Pastry \cite{rowstron_pastry:_2001}, PeerCube\cite{anceaume_peercube:_2008} to name a few). These systems are all dependent on distributed hash tables (DHTs), consisting of an ID space that is partitioned across multiple peers. Overlays are built to impose various properties upon a DHT. Overlays can be structured or unstructured, but structured overlays provide better scalability, efficiency and fault tolerance at the cost of more maintenance \cite{locher_equus:_2006}. This efficiency and fault tolerance is significantly reduced under high rates of churn. PeerCube provides resistance to a large number of peers leaving and joining the network as well as some resistance to malicious peers \cite{anceaume_peercube:_2008}. These are the core, desirable properties of PeerCube that will be maintained throughout this project.
+
+This paper provides some modifications that can be made to PeerCube to improve performance for frequently accessed data. As a modification of PeerCube, this overlay is also based on a hypercubic topology with clustering at each vertex of the hypercube. The clusters are relatively unstructured. This combination of a small-scale unstructured DHT and a large-scale structured DHT overcomes some of the limitations of each. Firstly, the unstructured clusters will never expand to a large size. This ensures that the clusters do not suffer from the same scalability constraints that plague larger unstructured DHTs \cite{lua_survey_2005}. Secondly, the clusters are organized hierarchically, with a limited number of core peers that handle traffic and a number of hot-swappable spares. This limits the effects of churn; A new peer will not cause data reshuffling until it is necessary to restructure to maintain integrity.
+
+The modifications provided are namely the caching of frequently accessed data and the paging of infrequently accessed data. The data is cached closer to the origin of the request to minimize latency. This is accomplished by placing a limited connection preempting the structure of the DHT. As for the paging of the data, the data is simply stored to disk when is has not been accessed within a specified time-frame. This saves memory at each node at the cost of higher initial latency for infrequently accessed data.
+
+    %4-Hypercube%
+    \begin{figure}[!t]
+	    \hspace*{-0.15\linewidth}
+	    \centering
+		\input{figures/4H.tex}
+	    \captionsetup{}
+	    \caption{A 4-Hypercube}
+	    \label{fig:4H}
+    \end{figure}
+
+\section{Related Work}
+There is a large body of work concerning robustness against churn and collusion in the context of DHTs. Reference \cite{li_comparing_2004} compares the performance of various DHTs under churn, establishing a method for analyzing the relative characteristics of DHTs using a simulation not unlike the one employed later in this paper.  Fault tolerance is explored in \cite{hildrum_asymptotically_2003} with an assessment of two popular DHTs, Pastry \cite{rowstron_pastry:_2001} and Tapestry \cite{zhao_tapestry:_2001}. 
+This project is based on the PeerCube overlay as defined in \cite{anceaume_peercube:_2008}. As such, the DHT simulated exploits many of the key properties of hypercubes outlined in \cite{saad_topological_1988}, namely the properties of \textit{recursive construction} and \textit{independent routes}. The DHT also employs techniques similar to those defined in \cite{frank_method_2000} whereby data that is frequently accessed and cachable is cached.
+
+\blindtext
+
+
+\section{Architecture Description}
+The DHT investigated in this paper is based upon PeerCube \cite{anceaume_peercube:_2008} and as such is composed of hypercube of unstructured clusters. The algorithm as understood and implemented will be reiterated in the following section to dispel confusion. Much of the following section is a reiteration with minimal modification of work presented in \cite{anceaume_peercube:_2008}.
+
+	\subsection{Background}
+		The network exhibits a hypercubic topology. 
+		A $d$-hypercube has $2^d$ vertices with $d$ edges between each vertex. 
+		The hypercube in figure \ref{fig:4H} is 4 dimensional. 
+		It has 16 vertices with 4 edges on each vertex.
+		Hypercubes were chosen a few of their key properties.
+
+		
+		\begin{property}[Recursive Construction \cite{saad_topological_1988}]
+			\label{recursiveconstruction} 
+			A $d$-hypercube can be constructed out of lower dimensional hypercubes.
+		\end{property}
+		 
+		%4-Hypercube-labelled%
+	    \begin{figure}[H]
+		    \hspace*{-0.05\linewidth}
+		    \centering
+			\input{figures/4HRC.tex}
+		    \captionsetup{}
+		    \caption{Recursive Construction of a 4-Hypercube}
+		    \label{fig:4HRC}
+	    \end{figure}
+		A $d$-hypercube is constructed by joining each corresponding vertex of two $(d-1)$-hypercubes. 
+		In figure \ref{fig:4HRC},
+		the 4-hypercube is comprised of two cubes such that if each vertex on one cube is given a binary label of 0000 through 0111,
+		the vertex will be linked to the vertex on the other cube labeled 1000 through 1111.
+		This means that each vertex is linked only to nodes that differ by exactly one bit i.e. their Hamming distance $\mathcal{H}(a,b)$ equals 1.
+		
+		\begin{property}[Independent Routes \cite{saad_topological_1988}]
+			\label{independentroutes}
+			If $n$ and $m$ are two vertices on a $d$-hypercube, 
+			there are $d$ independent paths between $n$ and $m$ with lengths less than or equal to $\mathcal{H}(m,n)+2$.
+		\end{property}
+		%4-Hypercube-paths%
+	    \begin{figure}[H]
+		    \hspace*{-0.05\linewidth}
+		    \centering
+			\input{figures/4HIR.tex}
+		    \captionsetup{}
+		    \caption{Independent Routes in a 4-Hypercube}
+		    \label{fig:4HIR}
+	    \end{figure}
+		Independent paths do not share any vertices except the source vertex and the destination vertex.
+		Each leg of the path between $n$ and $m$ changes just one bit.
+		There are $\mathcal{H}(m,n)$ optimal paths of length $\mathcal{H}(m,n)$ and a total of $d$ paths,
+		with a maximum length of $\mathcal{H}(m,n)+2$
+		In figure \ref{fig:4HIR}, the 4-Hypercube has 4 paths and $\mathcal{H}(m,n)=1$
+		As such, there is one optimal path, colored green, and 3 sub-optimal paths, colored red, purple, and blue.
+
+	%4-Network-Clusters%
+	    \begin{figure}[H]
+		    \hspace*{-0.05\linewidth}
+		    \centering
+			\input{figures/CLUSTERS.tex}
+		    \captionsetup{}
+		    \caption{Hypercubicly Organized Clusters}
+		    \label{fig:CLUSTERS}
+	    \end{figure}
+	\subsection{Algorithm Definition}
+		At it's core this DHT is a hypercube of unstructured clusters of peers. 
+		Peers gather into clusters, which in turn organize into a hypercube, as illustrated in figure \ref{fig:CLUSTERS}.
+		
+		%4-Cluster-Attributes-%
+			    \begin{figure}[H]
+					\begin{lrbox}{\mybox}
+					\hspace*{-0.8cm}
+					\begin{minipage}{0.91\columnwidth}
+				   		\textbf{\large{Cluster}}
+						\begin{addmargin}[1em]{0em}
+							\textbf{Attributes}
+							\begin{addmargin}[1em]{0em}
+								\textbf{d}: Dimensionality of the cluster\\
+								\textbf{label}: A $d$-bit prefix of the IDs of the peers contained in the cluster\\
+								\textbf{V\textsubscript{C}}:The set of \textit{core} peers. $|V_C| = S_{min}$\\
+								\textbf{V\textsubscript{S}}:The set of \textit{spare} peers.\\
+								\textbf{V\textsubscript{T}}:The set of \textit{temporary} peers.\\
+								
+							\end{addmargin}
+						\end{addmargin}
+					\end{minipage}
+					\end{lrbox}
+					\framebox[\columnwidth]{\hspace*{15pt}\usebox\mybox\par}
+					\caption{Cluster Attribute Overview}
+				    \label{fig:CLUSTERDEF}
+			    \end{figure}
+
+		\subsubsection{Clusters}
+			Each new peer is randomly assigned a unique random identifier from an $m$-bit ID space. 
+			Random ID assignment prevents maliciously targeted insertion of peers.
+			Groups of peers sharing a common prefix gather in \textit{clusters}.
+			Each cluster is labeled with the \textit{common prefix} of it's contained peers.
+			A cluster's label describes its location in the hypercube and determines which other clusters are its neighbors. 
+			
+			\begin{property}[Non-Inclusion]
+				\label{non-inclusion}
+				If a cluster $\mathcal{C}$ exists and is labeled $b_0...b_{d-1}$, 
+				then no cluster $\mathcal{C'}$ with $\mathcal{C} \neq \mathcal{C'}$ whose label is prefixed by $b_0...b_{d-1}$ exists.
+			\end{property}
+
+			The length of a cluster label is the \textit{dimension} of that cluster. 
+			A cluster of dimension $d$ is a referred to as a $d$-cluster and has a label $d$ bits long.
+			The peers in a $d$ cluster maintain a routing table with the $d$ closest neighbors, 
+			as defined by distance function $\mathcal{D}$ in equation \ref{distanceD}. 
+			
+			A key referring to some data will be routed to the cluster whose label is closest to that of the key.
+			Each peer in a cluster is responsible for the same data and data keys.
+			In effect, the data is replicated across all peers in a cluster.
+			Clusters have a maximum size $S_{max}$ and a minimum size $S_{min}$.
+			$S_{min}$ and $S_{max}$ are constants defined by the probability of peer failure and the proportion of malicious peers respectively.
+
+		\subsubsection{Topology}
+			Clusters organize into hypercubes by their labels. An ideal $d$-hypercube is comprised of $2^d$ $d$-clusters. 
+			Each cluster will be linked to at most $d$ other close clusters, as defined by distance $\mathcal{D}$. 
+			
+			\begin{definition}
+				Let $\mathcal{C}$ and $\mathcal{C'}$ be clusters of dimensionality $d$ and $d'$ respectively. Distance $\mathcal{D}$ can be defined as such:
+				\begin{equation}
+					\label{distanceD}
+					\mathcal{D(C,C')} = \mathcal{D}(a_0...a_{d-1}, b_0...b_{d'-1})=\sum\limits_{i=0,a_i \neq b_i}^{m-1} 2^{m-i}
+				\end{equation}
+			\end{definition}
+
+			This function is defined as such so that for any given ID $a_0...a_{d-1}$ and any given distance $\Delta$,
+			there exists exactly one ID $b_0...b_{d-1}$ such that $\mathcal{D}(a_0...a_{d-1},b_0...b_{d-1}) = \Delta$. \
+			This ensures that unqiue closeness can be determined by each cluster.
+			
+			Maintaining an ideal hypercube is not always a possible. Due to randomness of ID assignment and churn, clusters may grow or shrink non-uniformly.
+			When the size of cluster $\mathcal{C}$ is less than$S_{min}$, 
+			$\mathcal{C}$ must merge with other clusters into a single cluster $\mathcal{C'}$ with a size greater than $S_{min}$.
+			On the other hand, when the size of cluster $\mathcal{C}$ is greater than $S_{max}$, 
+			$\mathcal{C}$ must split into two $(d+1)$-clusters each of size between $S_{min}$ and $S_{max}$.
+			
+			\vspace{1em}
+			
+
+
+
+			
+			
+
+				
+				
+				
+
+		Each node has an $m$-bit unique identifier represented as $b_0...b_{m-1}.$
+		
+		
+		
+		
+		
+
+
+		
+		\begin{algorithm}
+			\scriptsize
+			\LinesNumbered
+			\DontPrintSemicolon
+			\SetKwInOut{Upon}{Upon}
+			\SetKw{Send}{send}
+			\SetKw{Wait}{wait}
+			\begin{lrbox}{\mybox}
+				\begin{minipage}{\hsize}
+					% Write your algorithm starting here
+					\Indentp{-1em}
+					\Upon{reception of ($'lookup'$, $key$, $q$, $origin$) from the network}
+					\Indentp{1.2em}
+					$p.RHC_{key} \gets (\frac{S_{min}+1}{3}+1)$\;
+					$C \gets p$.findClosestCluster($key.id$)\;
+					\eIf{$C.label$ = $p.cluster.label$}{
+						\eIf{$p.RHC_{key} = 0$}{
+							$p.RHC_{key} \gets (\frac{S_{min}+1}{3}+1)$\;
+							\ForEach{$\varphi \in C.V_c$}{
+							 	\Send{($'lookup'$, key, p, p) to  $\varphi$}\;
+							}
+						}{
+							$data \gets p.DS[key]$\;
+							\Send{($'lookupreturn'$, $key$, $data$, $p$) to  $q$}\;
+						}
+						\Wait{until $p.RHC[key] = 0$}\;
+						\tcp{Waits for $\frac{S_{min}+1}{3}+1$ responses about \textit{key}}
+						$p.RHC[key] \gets -1$\;
+						$data \gets  p.RHD[key]$\;
+						\Send{($'lookupreturn'$, key,data, p) to  q}
+				  	}{
+						\ForEach{$\varphi \in C.V_c$}{
+						 	\Send{($'lookup'$, key, p, p) to  $\varphi$}\;
+						}
+					}
+					\Wait{until $p.RHC[key] = 0$}\;
+					\tcp{Waits for $\frac{S_{min}+1}{3}+1$ responses about \textit{key}}
+					$p.RHC[key] \gets -1$\;
+					$data \gets  p.RHD[key]$\;
+					\Send{($'lookupreturn'$, key,data, p) to  q}\;
+					% End your algorithm here
+				\end{minipage}%
+			\end{lrbox}
+			\hspace*{-10pt}\framebox[\columnwidth]{\hspace*{15pt}\usebox\mybox\par}
+			\caption{$lookup$ Operation at Peer $p$}
+			\label{alg:lookup}
+		\end{algorithm}
+		\begin{algorithm}
+			\scriptsize
+			\LinesNumbered
+			\DontPrintSemicolon
+			\SetKwInOut{Upon}{Upon}
+			\SetKw{Send}{send}
+			\SetKw{Wait}{wait}
+			\begin{lrbox}{\mybox}
+				\begin{minipage}{\hsize}
+					% Write your algorithm starting here
+					\Indentp{-1em}
+					\Upon{reception of ($'lookupreturn'$, $key$, $data$, $origin$) \\from the network}
+					\Indentp{1.2em}
+					\If{$p.RHC_{key} \neq -1$}{
+						$p.RHD[key] \gets data$\;
+						$p.RHC[key] \gets$ max($p.RHC[key] - 1, 0$)\;
+					}
+					% End your algorithm here
+				\end{minipage}%
+			\end{lrbox}
+			\hspace*{-10pt}\framebox[\columnwidth]{\hspace*{15pt}\usebox\mybox\par}
+			\caption{$lookupreturn$ Operation at Peer $p$}
+			\label{alg:lookupreturn}
+		\end{algorithm}
+
+\subsection{Modifications}
+
+\subsubsection{Hot Data Caching}
+Hot data caching is a technique whereby data that is particularly frequently requested is replicated to faster or closer storage to minimize lookup times. A basic algorithm for implementing this is described in \cite{frank_method_2000}. In essence, each peer keeps a registry of which peers requested the data in recent time. If a peer requests data more than $T_{cache}$ times in the timeframe $T_{replicate} \cdot H(p, origin)$, the peer is added to the registry $RH_{cache}$ so that each new update to the data will also update the cached data. In order to implement this improvement, the algorithm for a lookup changes as such: 
+
+		\begin{algorithm}
+			\scriptsize
+			\LinesNumbered
+			\DontPrintSemicolon
+			\SetKwInOut{Upon}{Upon}
+			\SetKw{Send}{send}
+			\SetKw{Wait}{wait}
+			\begin{lrbox}{\mybox}
+				\begin{minipage}{\hsize}
+					% Write your algorithm starting here
+					\Indentp{-1em}
+					\Upon{reception of ($'lookup'$, $key$, $q$, $origin$) from the network}
+					\Indentp{1.2em}
+					$p.RHC_{key} \gets (\frac{S_{min}+1}{3}+1)$\;
+					$C \gets p$.findClosestCluster($key.id$)\;
+					\eIf{$C.label$ = $p.cluster.label$}{
+						\eIf{$p.RHC_{key} = 0$}{
+							$p.RHC_{key} \gets (\frac{S_{min}+1}{3}+1)$\;
+							\ForEach{$\varphi \in C.V_c$}{
+							 	\Send{($'lookup'$, key, p, p) to  $\varphi$}\;
+							}
+						}{
+							$data \gets p.DS[key]$\;
+							$p.RHR[key, q] \gets p.RHR[key, q] + 1$\;
+							\tcp{Counts number of times \textit{key}  has been requested from \textit{q}}
+							\Send{($'lookupreturn'$, $key$, $data$, $p$) to  $q$}\;
+						}
+						\Wait{until $p.RHC[key] = 0$}\; 
+						\tcp{Waits for $\frac{S_{min}+1}{3}+1$ responses about \textit{key}}
+						$p.RHC[key] \gets -1$\;
+						$data \gets  p.RHD[key]$\;
+						$replicate \gets p.RHR[key, q] > T_{cache}$\;
+						\tcp{Whether to replicate key at \textit{q}}
+						\Send{($'lookupreturn'$, key,data, p, replicate) to  q}
+				  	}{
+						\ForEach{$\varphi \in C.V_c$}{
+						 	\Send{($'lookup'$, key, p, p) to  $\varphi$}\;
+						}
+					}
+					\Wait{until $p.RHC[key] = 0$}\;
+					\tcp{Waits for $\frac{S_{min}+1}{3}+1$ responses about \textit{key}}
+					$p.RHC[key] \gets -1$\;
+					$data \gets  p.RHD[key]$\;
+					$replicate \gets p.RHR[key, q] > T_{cache}$\;
+					\Send{($'lookupreturn'$, $key$,$data$, $p$, $replicate$) to  q}\;
+					% End your algorithm here
+				\end{minipage}%
+			\end{lrbox}
+			\hspace*{-10pt}\framebox[\columnwidth]{\hspace*{15pt}\usebox\mybox\par}
+			\caption{Hot Caching $lookup$ Operation at Peer $p$}
+			\label{alg:lookup}
+		\end{algorithm}
+		
+		\begin{algorithm}
+			\scriptsize
+			\LinesNumbered
+			\DontPrintSemicolon
+			\SetKwInOut{Upon}{Upon}
+			\SetKw{Send}{send}
+			\SetKw{Wait}{wait}
+			\begin{lrbox}{\mybox}
+				\begin{minipage}{\hsize}
+					% Write your algorithm starting here
+					\Indentp{-1em}
+					\Upon{reception of ($'lookupreturn'$, $key$, $data$, $origin$, $replicate$) \\from the network}
+					\Indentp{1.2em}
+					\If{$p.RHC_{key} \neq -1$}{
+						$p.RHR[key, p] = p.RHR[key, p] + 1$
+						$p.RHD[key] \gets data$\;
+						$p.RHC[key] \gets$ max($p.RHC[key] - 1, 0$)\;
+					}
+					% End your algorithm here
+				\end{minipage}%
+			\end{lrbox}
+			\hspace*{-10pt}\framebox[\columnwidth]{\hspace*{15pt}\usebox\mybox\par}
+			\caption{$lookupreturn$ Operation at Peer $p$}
+			\label{alg:lookupreturn}
+		\end{algorithm}
+
+\subsubsection{Cold Data Paging}
+Data that is especially infrequently accessed is saved to disk and mostly emptied from memory.
+
+\subsubsection{Duplicate Request Handling}
+Instead of each duplicate request spawning a new lookup operation, a node will simply forward the result of a pending request to the requester if the requester requests some data $k$ during an ongoing request for $k$. This lessens the load on the network and functions as a form of very short-lived automatic caching.
+
+\subsection{Simulation}
+	The simulation attempts to closely mimic actual network traffic. The boundaries between peers are respected, and all data transfered between peers is copied rather than passed by reference. The network transactions are simulated non-atomically and asynchronously. The simulation is extremely close to an actual implementation of the algorithm, only with all network calls replaced by semi-consistently randomly delayed queues with a chance for failure or timeouts. This chance is randomly defined by constraints $P_{success}$ and $P_{timeout}$. The simulation also maintains a global state of the network so that further analysis into the inner workings of the network may be done. Seeing as how this simulation is not a real-world test, only the relative performance of the various configurations is significant. The absolute magnitude is largely irrelevant and almost entirely dependent on the testing hardware.
+
+	Malicious peers are simulated as purely non-functional for the purposes of this simulation. They are not a primary focus of the investigation, and as such, their impacts are largely assumed to be similar to that of a failing node. Further investigations into the behaviors of the DHT with properly malicious nodes of various degrees may be conducted at a later date.
+
+	The simulations conducted covered a large range of different conditions. [CONTINUE THIS]
+
+\section{Simulation Results}
+	
+
+	\begin{figure}[H]
+		\centering
+		\hspace*{-0.075\linewidth}
+		\input{figures/graphMeanRPS.tex}
+		\captionsetup{}
+		\caption{Mean requests per second (Higher is better)}
+		\label{fig:GMeanRPS}
+	\end{figure}
+
+	\begin{figure}[H]
+		\centering
+		\hspace*{-0.075\linewidth}
+		\input{figures/graphMean95L.tex}
+		\captionsetup{}
+		\caption{95th percentile latency in ms (Lower is better)}
+		\label{fig:GMeanRPS}
+	\end{figure}
+
+\section{Conclusion}
+
+
+
+
+
+
+%Pathing%
+\tikzset{cluster/.style = {shape=circle,draw, minimum size = 1.2cm}}
+\tikzset{node/.style = {shape=circle,draw,fill=black}}
+\tikzset{path/.style = {-latex'}}
+\begin{figure}
+	\hspace*{-0.08\linewidth}
+	\centering
+	\input{figures/REQUEST.tex}
+	\caption{Request}
+	\vspace{0.2cm}
+	\input{figures/RESPONSE.tex}
+	\label{fig:Request}
+	\captionsetup{}
+	\caption{Response to a Request}
+	\label{fig:Response}
+\end{figure}
+
+
+%Splitting%
+\tikzset{cluster/.style = {shape=circle,draw, minimum size = 1.2cm}}
+\tikzset{node/.style = {shape=circle,draw,fill=black}}
+\tikzset{path/.style = {latex-latex'}}
+\begin{figure}
+	\hspace*{-0.05\linewidth}
+	\centering
+	\input{figures/PRESPLIT.tex}
+	\caption{Network Before Cluster Split}
+	\vspace{0.2cm}
+	\hspace*{-0.16\linewidth}
+	\input{figures/POSTSPLIT.tex}
+	\captionsetup{}
+	\caption{Network After Cluster Split}
+	\label{fig:Split}
+\end{figure}
+
+
+
+
+
+
+
+
+
+
+
+
+
+% if have a single appendix:
+%\appendix[Proof of the Zonklar Equations]
+% or
+%\appendix  % for no appendix heading
+% do not use \section anymore after \appendix, only \section*
+% is possibly needed
+
+% use appendices with more than one appendix
+% then use \section to start each appendix
+% you must declare a \section before using any
+% \subsection or using \label (\appendices by itself
+% starts a section numbered zero.)
+%
+
+
+\appendices
+\section{Proof of the First Zonklar Equation}
+[MAYBE REMOVE APPENDICES ENTIRELY]
+
+% use section* for acknowledgement
+\section*{Acknowledgment}
+
+
+The authors would like to thank...
+
+
+% Can use something like this to put references on a page
+% by themselves when using endfloat and the captionsoff option.
+\ifCLASSOPTIONcaptionsoff
+  \newpage
+\fi
+
+
+
+% trigger a \newpage just before the given reference
+% number - used to balance the columns on the last page
+% adjust value as needed - may need to be readjusted if
+% the document is modified later
+%\IEEEtriggeratref{8}
+% The "triggered" command can be changed if desired:
+%\IEEEtriggercmd{\enlargethispage{-5in}}
+
+% references section
+
+% can use a bibliography generated by BibTeX as a .bbl file
+% BibTeX documentation can be easily obtained at:
+% http://www.ctan.org/tex-archive/biblio/bibtex/contrib/doc/
+% The IEEEtran BibTeX style support page is at:
+% http://www.michaelshell.org/tex/ieeetran/bibtex/
+%\bibliographystyle{IEEEtran}
+% argument is your BibTeX string definitions and bibliography database(s)
+%\bibliography{IEEEabrv,../bib/paper}
+%
+% <OR> manually copy in the resultant .bbl file
+% set second argument of \begin to the number of references
+% (used to reserve space for the reference number labels box)
+\bibliographystyle{IEEEtranS}
+\bibliography{./bib}
+
+% biography section
+% 
+% If you have an EPS/PDF photo (graphicx package needed) extra braces are
+% needed around the contents of the optional argument to biography to prevent
+% the LaTeX parser from getting confused when it sees the complicated
+% \includegraphics command within an optional argument. (You could create
+% your own custom macro containing the \includegraphics command to make things
+% simpler here.)
+%\begin{biography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{mshell}}]{Michael Shell}
+% or if you just want to reserve a space for a photo:
+
+%\begin{IEEEbiography}[]{}
+%\end{IEEEbiography}
+
+% You can push biographies down or up by placing
+% a \vfill before or after them. The appropriate
+% use of \vfill depends on what kind of text is
+% on the last page and whether or not the columns
+% are being equalized.
+
+%\vfill
+
+% Can be used to pull up biographies so that the bottom of the last one
+% is flush with the other column.
+%\enlargethispage{-5in}
+
+
+
+% that's all folks
+\end{document}
+
+

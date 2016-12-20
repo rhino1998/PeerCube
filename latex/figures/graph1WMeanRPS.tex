@@ -1,0 +1,89 @@
+\documentclass[border=1mm,
+               class=article
+               preview]{standalone}
+
+
+\begin{document}
+	\resizebox{\columnwidth}{!}{
+		\pgfdeclarelayer{bg}    % declare background layer
+		\pgfsetlayers{bg,main}  % set the order of the layers (main is the standard layer)
+		\tikzset{cluster/.style = {shape=circle,draw, minimum size = 1.2cm}}
+		\tikzset{node/.style = {shape=circle,draw,fill=black}}
+		\tikzset{path/.style = {-latex'}}
+		\captionsetup{
+				labelfont=bf,
+				justification=centering,
+				font={small}
+			}
+		\begin{tikzpicture}[scale=1]
+			\begin{axis}[
+			title={\caption{Mean Requests per Second\\($w = 1$)}\label{graph:1WMeanRPS}}, 
+			title style={yshift=2.5ex,text width=8cm, align=center},
+				xlabel={Percentage of malicious peers ($\mu$)},
+				ylabel={Requests per second},
+				ybar,
+				legend style={at={(1,1.13)},legend columns=-1, font=\footnotesize},
+				legend cell align=center,
+				legend image post style={xscale=1.7},
+				bar width=6pt,
+				xtick=data,
+				xticklabels={0\%,5\%,10\%,20\%},
+				ymin=0,
+				enlarge x limits=0.2,
+				restrict y to domain=<0>:<5000>,
+				xmajorgrids=true,
+				x tick label style={rotate=0,anchor=north,font=\footnotesize, align=center},
+				y tick label style={rotate=0},
+			]
+					\pgfplotstablegetelem{1}{m0RPS}\of\defaultAVG
+					\pgfmathsetmacro{\ya}{\pgfplotsretval}
+					\pgfplotstablegetelem{1}{m5RPS}\of\defaultAVG
+					\pgfmathsetmacro{\yb}{\pgfplotsretval}
+					\pgfplotstablegetelem{1}{m10RPS}\of\defaultAVG
+					\pgfmathsetmacro{\yc}{\pgfplotsretval}
+					\pgfplotstablegetelem{1}{m20RPS}\of\defaultAVG
+					\pgfmathsetmacro{\yd}{\pgfplotsretval}
+
+
+					\addplot[style={ppurple,fill=ppurple}] coordinates {(0,\ya) (1,\yb) (2,\yc) (3,\yd)};
+
+					\pgfplotstablegetelem{1}{m0RPS}\of\cacheAVG
+					\pgfmathsetmacro{\ya}{\pgfplotsretval}
+					\pgfplotstablegetelem{1}{m5RPS}\of\cacheAVG
+					\pgfmathsetmacro{\yb}{\pgfplotsretval}
+					\pgfplotstablegetelem{1}{m10RPS}\of\cacheAVG
+					\pgfmathsetmacro{\yc}{\pgfplotsretval}
+					\pgfplotstablegetelem{1}{m20RPS}\of\cacheAVG
+					\pgfmathsetmacro{\yd}{\pgfplotsretval}
+
+
+					\addplot[style={bblue,fill=bblue}] coordinates {(0,\ya) (1,\yb) (2,\yc) (3,\yd)};
+
+					\pgfplotstablegetelem{1}{m0RPS}\of\pagingAVG
+					\pgfmathsetmacro{\ya}{\pgfplotsretval}
+					\pgfplotstablegetelem{1}{m5RPS}\of\pagingAVG
+					\pgfmathsetmacro{\yb}{\pgfplotsretval}
+					\pgfplotstablegetelem{1}{m10RPS}\of\pagingAVG
+					\pgfmathsetmacro{\yc}{\pgfplotsretval}
+					\pgfplotstablegetelem{1}{m20RPS}\of\pagingAVG
+					\pgfmathsetmacro{\yd}{\pgfplotsretval}
+
+
+					\addplot[style={ggreen,fill=ggreen}] coordinates {(0,\ya) (1,\yb) (2,\yc) (3,\yd)};
+
+					\pgfplotstablegetelem{1}{m0RPS}\of\bothAVG
+					\pgfmathsetmacro{\ya}{\pgfplotsretval}
+					\pgfplotstablegetelem{1}{m5RPS}\of\bothAVG
+					\pgfmathsetmacro{\yb}{\pgfplotsretval}
+					\pgfplotstablegetelem{1}{m10RPS}\of\bothAVG
+					\pgfmathsetmacro{\yc}{\pgfplotsretval}
+					\pgfplotstablegetelem{1}{m20RPS}\of\bothAVG
+					\pgfmathsetmacro{\yd}{\pgfplotsretval}
+
+
+					\addplot[style={rred,fill=rred}] coordinates {(0,\ya) (1,\yb) (2,\yc) (3,\yd)};
+			\legend{Unmodified,Replication,Paging,Both};
+			\end{axis}
+		\end{tikzpicture}
+	}
+\end{document}

@@ -1,0 +1,89 @@
+\documentclass[border=1mm,
+               class=article
+               preview]{standalone}
+
+
+\begin{document}
+        \pgfdeclarelayer{bg}    % declare background layer
+        \pgfsetlayers{bg,main}  % set the order of the layers (main is the standard layer)
+        \tikzset{box/.style = {shape=rectangle,draw,fill=gray!30,inner sep=0.05cm,outer sep=0}}
+        \tikzset{vertex/.style = {shape=circle,draw,fill=black}}
+        \tikzset{edge/.style = {latex-latex}}
+        \begin{tikzpicture}[scale=0.8]
+            \pgfmathtruncatemacro{\m}{4};
+            \pgfmathtruncatemacro{\ml}{\m-1};
+            \pgfmathtruncatemacro{\n}{2^\m};
+            \pgfmathtruncatemacro{\nl}{\n-1};
+            \foreach \i in {0,...,\nl}{%
+                \pgfmathtruncatemacro{\lab}{bin(\i)};%
+                \pgfmathtruncatemacro{\x}{(mod(\i,2))*2-1};%
+                \pgfmathtruncatemacro{\y}{((mod(\i,4)-mod(\i,2))/2)*2-1};%
+                \pgfmathtruncatemacro{\z}{((mod(\i,8)-mod(\i,4))/4)*2-1};%
+                \pgfmathtruncatemacro{\mul}{((\i-mod(\i,8))/8)+1};%
+                \node[vertex,scale=0.5,label={
+                    [box,fill=
+                        \ifnum\number\i<16
+                            \ifnum\number\i<8
+                                blue!30
+                            \else
+                                red!30
+                            \fi
+                        \else
+                            gray!30
+                        \fi,
+                        label distance=0.1cm]
+                    \ifnum\number\x<0 
+                        \ifnum\number\y<0 
+                            0
+                        \fi
+                        \ifnum\number\y>0 
+                            0
+                        \fi
+                    \fi
+                    \ifnum\number\x>0 
+                        \ifnum\number\y<0 
+                            0
+                        \fi
+                        \ifnum\number\y>0 
+                            0
+                        \fi
+                    \fi
+                    :\scriptsize{\ifnum\number\lab<1000 0\fi\ifnum\number\lab<100 0\fi\ifnum\number\lab<10 0\fi\lab}}] (\i) at (1.3*\mul*\x,1.3*\mul*\y,1.3*\z*\mul*.4){};%
+            }%
+            \begin{pgfonlayer}{bg} 
+                \draw[edge] (0) to (1);
+                \draw[edge] (0) to (2);
+                \draw[edge] (0) to (4);
+                \draw[edge] (0) to (8);
+                \draw[edge] (1) to (3);
+                \draw[edge] (1) to (5);
+                \draw[edge] (1) to (9);
+                \draw[edge] (2) to (3);
+                \draw[edge] (2) to (6);
+                \draw[edge] (2) to (10);
+                \draw[edge] (3) to (7);
+                \draw[edge] (3) to (11);
+                \draw[edge] (4) to (5);
+                \draw[edge] (4) to (6);
+                \draw[edge] (4) to (12);
+                \draw[edge] (5) to (7);
+                \draw[edge] (5) to (13);
+                \draw[edge] (6) to (7);
+                \draw[edge] (6) to (14);
+                \draw[edge] (7) to (15);
+                \draw[edge] (8) to (9);
+                \draw[edge] (8) to (10);
+                \draw[edge] (8) to (12);
+                \draw[edge] (9) to (11);
+                \draw[edge] (9) to (13);
+                \draw[edge] (10) to (11);
+                \draw[edge] (10) to (14);
+                \draw[edge] (11) to (15);
+                \draw[edge] (12) to (13);
+                \draw[edge] (12) to (14);
+                \draw[edge] (13) to (15);
+                \draw[edge] (14) to (15);
+            \end{pgfonlayer}
+        \end{tikzpicture}
+
+\end{document}

@@ -1,0 +1,115 @@
+﻿//Did you copy paste the document into a text file before commenting?
+//Some of your comments allude to a "forsome" that was a "thereexists" in the pdf
+
+
+1. Algorithm
+    This algorithm describes a distributed hash table comprised of hypercube of clusters of peers. It is a simplified version
+    of the PeerCube algorithm. It does not account for merging or splitting of clusters or the failure or addition of peers.
+    It also does not differentiate between peer types because no peers can join, so no peers could ever be non-core. It does
+    remove some uniqueness constraints so that the network does not break in the case of hash collisions, however unlikely
+    they may be.
+
+    1.1 Constants
+        m : The length of an id. is the maximum number of clusters
+        Smax : maximum size of a cluster. 2^m ∗ Smax is the max number of peers
+        Smin : minimum size of a cluster
+
+    1.2 Globals
+        Values used for analysis
+        Peers : The set of all unique peer instances (by address) in the network
+        Clusters: The set of all unique clusters instances in the network
+        Addrs : The set of all peers’ addresses in the network
+
+    1.3 Starting State
+        |Peers| > Smin ∗ m
+        |Clusters| = 2^m
+        ∀p ∈ Peers, |p.RT | = m = p.cluster.dim
+        ∀p ∈ Peers, p.RT_i = C ∈ Clusters | C.label = b0 ...bar(b_i)...b_(m−1)
+
+    1.4 Functions
+        function D(A, B)
+            return sum 2^i from i=0 to m-1 if a_i =/= b_i. Returns the distance between a and b
+
+    1.5 Key k
+
+        1.5.1 Attributes
+            str : Eliminates hash collision issues. The plain english representation of the key.
+            id ← hash(k.str) : Used to determine the location for the key; A bitstring, not necessarily unique
+            //Eliminating the uniqueness of id and instead using key.str for any operation that could overwrite unintended data prevents very hard to track bugs due to potential hash collisions
+    1.6 Peer p
+        The network contains an arbitrary number of peers. Peers are representations of individual computers, and are the only
+        datastructure that is directly linked to a physical location.
+        
+        1.6.1 Attributes
+            id ← id A randomly assigned, non-unique identifier for peer p.
+            //The uniqueness of id was not essential to the operation of the dht, and introduced a (very unlikely) point of failure
+            addr : ip address of the peer
+            cluster : p belongs to exactly one cluster
+            RT : Routing table for peer p, contains cluster instances. p.R= C ⇐⇒ ∃C | C.label = b_0 ...bar(b_i) ...b_(m−1)
+            //RT points to 
+            RHC : Response Handler Count for p. A map of string to integers, with an undefined index of the map returning -1.
+            RHD : Response Handler Data for p. A map of string to byte arrays. The map returns nil for an undefined index
+            DataStore : A map of string to an array of bytes. The map returns nil for an undefined index.
+
+            1.6.2 Methods
+                function findClosestCluster(id)
+                    if p.cluster.label prefixof k or p.dim = 0 then
+                        return p.cluster
+                    closest = p.RT_i
+                    i←1
+                    for i < p.cluster.dim do
+                        if D(p.R, id) < D(closest.label, id) then
+                            closest ← p.R
+                    return closest
+                function lookup(key)
+                    assume: No ongoing lookup operations for key.
+                    p.RHC[key.str] ← (Smin-1)/3 + 1
+                    C ← p.findClosestCluster(key.id)
+                    for all ϕ in a random subset of C.Vc with length (Smin-1)/3 + 1 do 
+                        send ( LOOKU P , key, p, p) to ϕ
+                    wait until p.RHC[key.str] = 0
+                    return p.RHD[key.str]
+
+            1.6.3 Network Messages
+                ("LOOKUP" , key, origin, prev) A lookup request
+                ("LOOKUPRETURN" , key, data, origin) A lookup response
+            1.6.4 Network Reactions
+                if ("LOOKUP" , key, origin, prev) recieved from the network then
+                    C ← p.findClosestCluster(key.id)
+                    if C.label = p.cluster.label then
+                        if p.RHC[key.str] = -1 then
+                            p.RHC[key.str] ← (Smin-1)/3 + 1    
+                            for all ϕ ∈ C.V_c do
+                                send ("LOOKUP", key, origin, p) to ϕ
+                            wait until p.RHC[key.str] = 0
+                            p.RHC[key.str] ← −1
+                            send ("LOOKUPRETURN" , key, p.DataStore[key.str], p) to prev
+                        else
+                            send ("LOOKUPRETURN" , key, p.DataStore[key.str], p) to prev
+                    else
+                        p.RHC[key.str] ← (Smin-1)/3 + 1
+                        for all ϕ ∈ ⊂ C.Vc | || = in+ 1 do
+                            send (LOOKUP, key, origin, p) to ϕ
+                        wait until p.RHC[key.str] = 0
+                        p.RHC[key.str] ← −1
+                        send ("LOOKUPRETURN" , key, p.RHD[key.str], p) to prev
+                if ("LOOKUPRETURN" , key, data, origin) recieved from the network then
+                    if p.RHC[key.str] =/= −1 then
+                        p.RHD[key.str] ← data
+                        p.RHC[key.str] ← max(p.RHC[key.str] − 1, 0)
+        1.7 Cluster C
+            The network contains an arbitrary number of peers.
+            1.7.1 Attributes
+                dim = |C.label|
+                label = b_0...b_(dim−1) ; A unique identifier for C. There does not exist C | C.label prefixof C.label   The label is assigned at creation.
+                //Doesn't this hold for 2^m clusters because trailing zeroes are significant. If m = 3
+                //000
+                //001
+                //010
+                //011
+                //100
+                //101
+                //110
+                //111
+                //These are all valid labels and all unique, without prefixing each other.
+                Vc ← {p ∈ Peers | C.label prefixof p.id }; Vc is a set of peer instances.

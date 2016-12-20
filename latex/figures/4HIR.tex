@@ -1,0 +1,81 @@
+shell.SendKeys("{ENTER}")\documentclass[border=1mm,
+               class=article
+               preview]{standalone}
+
+
+\begin{document}
+        \pgfdeclarelayer{bg}    % declare background layer
+        \pgfsetlayers{bg,main}  % set the order of the layers (main is the standard layer)
+        \tikzset{box/.style = {shape=rectangle,draw,inner sep=0.05cm,outer sep=0}}
+        \tikzset{vertex/.style = {shape=circle,draw,fill=black}}
+        \tikzset{edge/.style = {latex-latex}}
+        \begin{tikzpicture}[scale=0.8]
+            \pgfmathtruncatemacro{\m}{4};
+            \pgfmathtruncatemacro{\ml}{\m-1};
+            \pgfmathtruncatemacro{\n}{2^\m};
+            \pgfmathtruncatemacro{\nl}{\n-1};
+            \foreach \i in {0,...,\nl}{%
+                \pgfmathtruncatemacro{\lab}{bin(\i)};%
+                \pgfmathtruncatemacro{\x}{(mod(\i,2))*2-1};%
+                \pgfmathtruncatemacro{\y}{((mod(\i,4)-mod(\i,2))/2)*2-1};%
+                \pgfmathtruncatemacro{\z}{((mod(\i,8)-mod(\i,4))/4)*2-1};%
+                \pgfmathtruncatemacro{\mul}{((\i-mod(\i,8))/8)+1};%
+                \node[vertex,scale={
+                    \ifnum\number\i=10%
+                        0.8%
+                    \else%
+                        \ifnum\number\i=14%
+                            0.8%
+                        \else%
+                            0.5%
+                        \fi%
+                    \fi},
+                    fill={
+                    \ifnum\number\i=10%
+                        red%
+                    \else%
+                        \ifnum\number\i=14%
+                            red%
+                        \else%
+                            black%
+                        \fi
+                    \fi}] (\i) at (1.3*\mul*\x,1.3*\mul*\y,1.3*\z*\mul*.4){};%
+            }%
+            \begin{pgfonlayer}{bg} /votekick IIIIIIlIllIllIl
+            /votekick IIIIIIl
+                \draw[edge] (0) to (1);
+                \draw[edge] (0) to (2);
+                \draw[edge] (0) to (4);
+                \draw[edge] (0) to (8);
+                \draw[edge] (1) to (3);
+                \draw[edge] (1) to (5);
+                \draw[edge] (1) to (9);
+                \draw[edge] (2) to (3);
+                \draw[edge,very thick, ppurple] (2) to (6);
+                \draw[edge,very thick, ppurple] (2) to (10);
+                \draw[edge] (3) to (7);
+                \draw[edge] (3) to (11);
+                \draw[edge] (4) to (5);
+                \draw[edge] (4) to (6);
+                \draw[edge] (4) to (12);
+                \draw[edge] (5) to (7);
+                \draw[edge] (5) to (13);
+                \draw[edge] (6) to (7);
+                \draw[edge,very thick, ppurple] (6) to (14);
+                \draw[edge] (7) to (15);
+                \draw[edge] (8) to (9);
+                \draw[edge,very thick, bblue] (8) to (10);
+                \draw[edge,very thick, bblue] (8) to (12);
+                \draw[edge] (9) to (11);
+                \draw[edge] (9) to (13);
+                \draw[edge,very thick, rred] (10) to (11);
+                \draw[edge,very thick, ggreen] (10) to (14);
+                \draw[edge,very thick, rred] (11) to (15);
+                \draw[edge] (12) to (13);
+                \draw[edge,very thick, bblue] (12) to (14);
+                \draw[edge] (13) to (15);
+                \draw[edge,very thick, rred] (14) to (15);
+            \end{pgfonlayer}
+        \end{tikzpicture}
+
+\end{document}

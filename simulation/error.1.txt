@@ -1,0 +1,124 @@
+fatal error: all goroutines are asleep - deadlock!
+goroutine 1 [chan receive]:
+testing.	C:/Go/src/testing/testing.go:647 +0x31d
+testing.RunTests.func1	C:/Go/src/testing/testing.go:793 +0x74
+testing.tRunner	C:/Go/src/testing/testing.go:610 +0x88
+testing.RunTests	C:/Go/src/testing/testing.go:799 +0x2fc
+testing.	C:/Go/src/testing/testing.go:743 +0x8c
+main.main	github.com/rhino1998/peercube/simulation/_test/_testmain.go:54 +0xcd
+goroutine 13 [semacquire]:
+sync.runtime_Semacquire	C:/Go/src/runtime/sema.go:47 +0x37
+sync.	C:/Go/src/sync/rwmutex.go:43 +0x64
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/cluster.go:177 +0x4a
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/registry.go:72 +0xee
+github.com/rhino1998/peercube/simulation.TestSimulation	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/simulation_test.go:31 +0x15f
+testing.tRunner	C:/Go/src/testing/testing.go:610 +0x88
+created by testing.(*T).Run
+	C:/Go/src/testing/testing.go:646 +0x2f3
+goroutine 14 [chan receive]:
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/stdPeer.go:209 +0xfb
+github.com/rhino1998/peercube/simulation.TestSimulation.func1.1	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/simulation_test.go:20 +0x42
+github.com/rhino1998/peercube/simulation.TestSimulation.func1	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/simulation_test.go:23 +0x6c
+created by github.com/rhino1998/peercube/simulation.TestSimulation
+	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/simulation_test.go:27 +0xe3
+goroutine 2105 [semacquire]:
+sync.runtime_Semacquire	C:/Go/src/runtime/sema.go:47 +0x37
+sync.	C:/Go/src/sync/rwmutex.go:43 +0x64
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/cluster.go:210 +0x53
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/event.go:40 +0xa5
+	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/stdPeer.go:117 +0xc8c
+goroutine 3401 [semacquire]:
+sync.runtime_Semacquire	C:/Go/src/runtime/sema.go:47 +0x37
+sync.	C:/Go/src/sync/rwmutex.go:43 +0x64
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/cluster.go:202 +0x52
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/event.go:50 +0x57b
+	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/stdPeer.go:117 +0xc8c
+goroutine 11018 [semacquire]:
+sync.runtime_Semacquire	C:/Go/src/runtime/sema.go:47 +0x37
+sync.	C:/Go/src/sync/rwmutex.go:91 +0x9f
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/registry.go:78 +0x50
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/cluster.go:269 +0x8ea
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/cluster.go:147 +0x36d
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/event.go:67 +0x61
+	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/stdPeer.go:117 +0xc8c
+	
+goroutine 20784 [semacquire]:
+sync.runtime_Semacquire	C:/Go/src/runtime/sema.go:47 +0x37
+sync.	C:/Go/src/sync/rwmutex.go:43 +0x64
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/cluster.go:210 +0x53
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/event.go:40 +0xa5
+	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/stdPeer.go:117 +0xc8c
+
+goroutine 605570 [semacquire]:
+sync.runtime_Semacquire	C:/Go/src/runtime/sema.go:47 +0x37
+sync.	C:/Go/src/sync/rwmutex.go:43 +0x64
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/cluster.go:202 +0x52
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/event.go:50 +0x57b
+	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/stdPeer.go:117 +0xc8c
+goroutine 34970 [semacquire]:
+sync.runtime_Semacquire	C:/Go/src/runtime/sema.go:47 +0x37
+sync.	C:/Go/src/sync/rwmutex.go:43 +0x64
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/cluster.go:121 +0x47
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/event.go:67 +0x61
+	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/stdPeer.go:117 +0xc8c
+goroutine 125694 [semacquire]:
+sync.runtime_Semacquire	C:/Go/src/runtime/sema.go:47 +0x37
+sync.	C:/Go/src/sync/rwmutex.go:43 +0x64
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/cluster.go:202 +0x52
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/event.go:50 +0x57b
+	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/stdPeer.go:117 +0xc8c
+goroutine 188396 [semacquire]:
+sync.runtime_Semacquire	C:/Go/src/runtime/sema.go:47 +0x37
+sync.	C:/Go/src/sync/rwmutex.go:43 +0x64
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/cluster.go:202 +0x52
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/event.go:50 +0x57b
+	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/stdPeer.go:117 +0xc8c
+
+goroutine 198669 [semacquire]:
+sync.runtime_Semacquire	C:/Go/src/runtime/sema.go:47 +0x37
+sync.	C:/Go/src/sync/rwmutex.go:43 +0x64
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/cluster.go:202 +0x52
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/event.go:50 +0x57b
+	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/stdPeer.go:117 +0xc8c
+
+goroutine 211304 [semacquire]:
+sync.runtime_Semacquire	C:/Go/src/runtime/sema.go:47 +0x37
+sync.	C:/Go/src/sync/rwmutex.go:43 +0x64
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/cluster.go:202 +0x52
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/event.go:50 +0x57b
+	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/stdPeer.go:117 +0xc8c
+
+goroutine 237400 [semacquire]:
+sync.runtime_Semacquire	C:/Go/src/runtime/sema.go:47 +0x37
+sync.	C:/Go/src/sync/mutex.go:85 +0xd7
+sync.	C:/Go/src/sync/rwmutex.go:86 +0x38
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/cluster.go:128 +0xfe
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/event.go:67 +0x61
+	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/stdPeer.go:117 +0xc8c
+
+goroutine 305885 [semacquire]:
+sync.runtime_Semacquire	C:/Go/src/runtime/sema.go:47 +0x37
+sync.	C:/Go/src/sync/rwmutex.go:43 +0x64
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/cluster.go:121 +0x47
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/event.go:67 +0x61
+	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/stdPeer.go:117 +0xc8c
+
+goroutine 317722 [semacquire]:
+sync.runtime_Semacquire	C:/Go/src/runtime/sema.go:47 +0x37
+sync.	C:/Go/src/sync/rwmutex.go:43 +0x64
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/cluster.go:202 +0x52
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/event.go:50 +0x57b
+	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/stdPeer.go:117 +0xc8c
+goroutine 378165 [semacquire]:
+sync.runtime_Semacquire	C:/Go/src/runtime/sema.go:47 +0x37
+sync.	C:/Go/src/sync/rwmutex.go:43 +0x64
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/cluster.go:121 +0x47
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/event.go:67 +0x61
+	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/stdPeer.go:117 +0xc8c
+
+goroutine 518768 [semacquire]:
+sync.runtime_Semacquire	C:/Go/src/runtime/sema.go:47 +0x37
+sync.	C:/Go/src/sync/rwmutex.go:43 +0x64
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/cluster.go:202 +0x52
+github.com/rhino1998/peercube/simulation.	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/event.go:50 +0x57b
+	D:/work/goproj/src/github.com/rhino1998/peercube/simulation/stdPeer.go:117 +0xc8c

@@ -1,0 +1,166 @@
+% Preamble
+% ---
+\documentclass[]{article}
+
+% Packages
+% ---
+\usepackage[margin=0.62in]{geometry}
+\usepackage{amsmath}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{algorithmicx}
+\usepackage[noend]{algpseudocode}
+\usepackage{listings}
+\usepackage{amssymb}
+
+\title{Stripped Down PeerCube Definition}
+
+
+\begin{document}
+	\maketitle
+	\newpage
+	\section{Algorithm}
+		\paragraph{ }
+			This algorithm describes a distributed hash table comprised of hypercube of clusters of peers. 
+			It is a simplified version of the PeerCube algorithm. 
+			It does not account for merging or splitting of clusters or the failure or addition of peers. 
+			It also does not differentiate between peer types because no peers can join, so no peers could ever be non-core.
+			It does remove some uniqueness constraints so that the network does not break in the case of hash collisions, however unlikely they may be.
+		\subsection{Constants}
+			\paragraph{ }
+			\begin{algorithmic}
+			    \State $m$ : The length of an id. $2^m$ is the maximum number of clusters
+				\State $S_{max}$ : maximum size of a cluster. $2^m * S_{max}$ is the max number of peers
+				\State $S_{min}$ : minimum size of a cluster
+			\end{algorithmic}
+			
+			\subsection{Globals}
+				Values used for analysis
+					\begin{algorithmic}
+						\State Peers : The set of all unique peer instances (by address) in the network
+						\State Clusters: The set of all unique clusters instances in the network
+						\State Addrs : The set of all peers' addresses in the network
+					\end{algorithmic}
+
+			\subsection{Starting State}
+				\begin{algorithmic}
+					\State $|Peers|>S_{min}*m$
+					\State $|Clusters| = 2^m$
+					\State $\forall p \in Peers, |p.RT| = m = p.cluster.dim$
+					\State $\forall p \in Peers, p.RT_i = C \in Clusters \mid C.label = b_0...\bar{b}_i...b_{m-1}$
+				\end{algorithmic}
+
+			\subsection{Functions}
+				\begin{algorithmic}
+				
+					
+					\Function{D}{$A,B$}\Comment{Returns the distance between a and b}
+						\State \Return {$\sum\limits_{i=0,a_i \neq b_i}^{m-1} 2^{m-i}$}
+					\EndFunction
+						
+				\end{algorithmic}
+
+			\subsection{Key $k$}
+				\subsubsection{Attributes}
+					\begin{algorithmic}
+						\State $str$ : Eliminates hash collision issues. The plain english representation of the key.
+						\State $id \gets hash(k.str)$ : Used to determine the location for the key; A bitstring
+					\end{algorithmic}
+
+			\subsection{Peer $p$}
+				The network contains an arbitrary number of peers. 
+				Peers are representations of individual computers, and are the only datastructure that is directly linked to a physical location.
+				\subsubsection{Attributes}
+					\begin{algorithmic}
+						\State $id \gets \Call{id}{} $ A randomly assigned, non-unique identifier for peer $p$.
+						\State $addr$ : ip address of the peer
+						\State $cluster$ : $p$ belongs to exactly one cluster 
+						\State $RT$ : Routing table for peer $p$, contains cluster instances.  $p.RT_i = C \iff \exists C  \mid  C.label = b_0...\bar{b}_i...b_{m-1}$
+						\State $RHC$ : Response Handler Count for $p$. A map of string to integers, with an undefined index of the map returning -1. 
+						\State $RHD$ : Response Handler Data for $p$. A map of string to byte arrays. The map returns nil for an undefined index
+						\State $DataStore$ : A map of string to an array of bytes. The map returns nil for an undefined index.
+					\end{algorithmic}
+
+
+				\subsubsection{Methods}
+					\begin{algorithmic}
+						\Function{findClosestCluster}{id}
+							\If{p.cluster.label \Call{prefixo}{}f k or $p.dim = 0$}
+								\State \Return p.cluster
+							\EndIf
+							\State $closest = p.RT_0$
+							\State $i \gets 1$
+							\For{$i<$}
+								\If $\Call{D}{p.RT_i, id} < \Call{D}{closest.label, id}$
+									\State $closest \gets p.RT_i$
+								\EndIf
+							\EndFor	
+							\State \Return $closest$
+						\EndFunction
+						\Function{lookup}{$key$}
+							\State \textbf{assume: }No ongoing lookup operations for $key$.
+							\State  $p.RHC[key.str] \gets \frac{S_{min}+1}{3}+1$
+							\State $C \gets p.\Call{findClosestCluster}{key.id}$
+							\ForAll{$\varphi \in R_c \subset C.V_c \mid |R_c| = \frac{S_{min}-1}{3}+1$}
+								\State \textbf{send} ($'LOOKUP'$, $key$, $p$, $p$) to  $\varphi$
+							\EndFor
+							\State \textbf{wait} until $p.RHC[key.str] = 0$
+							\State \Return $p.RHD[key.str]$
+						\EndFunction
+					\end{algorithmic}
+					
+				\subsubsection{Network Messages}
+					\begin{algorithmic}
+						\State ($'LOOKUP'$, $key$, $origin$, $prev$) A lookup request
+						\State ($'LOOKUPRETURN'$, $key$, $data$, $origin$) A lookup response
+					\end{algorithmic}
+					
+				\subsubsection{Network Reactions}
+					\begin{algorithmic}
+						\If{($'LOOKUP'$, $key$, $origin$, $prev$) recieved from $N$}
+							\State  $p.RHC_{key.str} \gets \frac{S_{min}+1}{3}+1$
+							\State $C \gets p.\Call{findClosestCluster}{key.id}$
+							\If{$C.label$ = $p.cluster.label$}
+								\If{$p.RHC_{key.str} = 0$}
+									\State  $p.RHC_{key.str} \gets \frac{S_{min}+1}{3}+1$
+									\ForAll{$\varphi \in C.V_c$}
+										\State \textbf{send} ($'LOOKUP'$, $key$, $p$, $p$) to  $\varphi$
+									\EndFor
+								\Else
+										\State \textbf{send} ($'LOOKUPRETURN'$, $key$, $p.DataStore[key.str]$, $p$) to  $\varphi$
+								\EndIf
+							\Else
+								\ForAll{$\varphi \in R_c \subset C.V_c \mid |R_c| = \frac{S_{min}-1}{3}+1$}
+									\State \textbf{send} ($'LOOKUP'$, $key$, $p$, $p$) to  $\varphi$
+								\EndFor
+							\EndIf
+							\State \textbf{wait} until $p.RHC[key.str] = 0$
+							\State $p.RHC[key.str] \gets -1$
+							\State \textbf{send} ($'LOOKUPRETURN'$, $key$, $p.RHD[key.str]$, $p$) to  $\varphi$
+						\EndIf
+						\If{($'LOOKUPRETURN'$, $key$, $data$, $origin$) recieved from $N$}
+							\If{$p.RHC_{key.str} \neq -1$}
+								\State $p.RHD[key.str] \gets data$
+								\State $p.RHC[key.str] \gets \Call{max}{p.RHC[key.str] - 1, 0}$
+							\EndIf
+						\EndIf
+					\end{algorithmic}
+
+		\subsection{Cluster $C$}
+			The network contains an arbitrary number of peers.
+			\subsubsection{Attributes}
+				\begin{algorithmic}
+					\State $dim = |C.label|$
+					\State $label = b_0...b_{C.dim-1};$ A unique identifier for $C$. $\nexists C' \mid C'.label \, \Call{prefixof}{} \, C.label$
+					\State $V_c \gets \{p \in  Peers \mid \Call{prefixof}{C.label, p.id)}\};$
+				\end{algorithmic}
+	
+	\section{Assertions}
+		\begin{algorithmic}
+			\State $Peers$ is constant
+			\State $Clusters$ is constant
+			\State $p.V_c$ is constant for all $p \in Peers$
+		\end{algorithmic}
+
+\end{document}
