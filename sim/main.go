@@ -28,9 +28,9 @@ func main() {
 	time.Sleep(8 * time.Second)
 	simulation.Mu = 0.0
 	go func() {
-		max := float64(6)
+		max := float64(30)
 		for c := 0; c < int(max); c++ {
-			duration := 6 * time.Second
+			duration := 60 * time.Second
 			select {
 			case <-time.After(duration):
 				lat := atomic.SwapUint64(&latency, 0)
