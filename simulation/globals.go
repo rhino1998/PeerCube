@@ -4,7 +4,7 @@ import "time"
 
 const (
 	M           int           = 256
-	Mu          float64       = 0
+	Mu          float64       = 0.2
 	SMax        int           = 32
 	SMin        int           = 8
 	SafteyValue int           = ((SMin-1)/3 + 1)

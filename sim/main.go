@@ -56,40 +56,37 @@ func main() {
 	for simulation.PeerRegistry.Length() > simulation.TSplit {
 		//ClusterRegistry.PrintAll()
 		fmt.Println(simulation.PeerRegistry.Length(), ":", simulation.ClusterRegistry.SizeAll())
-		if simulation.ClusterRegistry.SizeAll() > 256 {
-			var p simulation.Peer
-			for _, fp := range simulation.PeerRegistry.Peers() {
-				if fp.GetType() == simulation.CORE {
-					p = fp
-					break
-				}
-			}
-			if p != nil {
-				go func() {
-					key := simulation.RandomID(simulation.M)
-					_, err := p.Put(key, simulation.RandomID(simulation.M).String())
-					if err != nil {
-						return
-					}
-					atomic.AddUint64(&requests, 1)
-					time.Sleep(800 * time.Millisecond)
-					start := time.Now()
-					_, err = p.Get(key)
-					atomic.AddUint64(&latency, uint64(time.Since(start)))
-					atomic.AddUint64(&requests, 1)
-					if err != nil {
-						fmt.Println("FAIL", err)
-					} else {
-						fmt.Println("SUCCESSSSSS")
-					}
-				}()
 
+		var p simulation.Peer
+		for _, fp := range simulation.PeerRegistry.Peers() {
+			if fp.GetType() == simulation.CORE {
+				p = fp
+				break
 			}
-			i := 0
-			for _, fp := range simulation.PeerRegistry.Peers() {
-				if i > 8 {
-					break
+		}
+		if p != nil {
+			go func() {
+				key := simulation.RandomID(simulation.M)
+				_, err := p.Put(key, simulation.RandomID(simulation.M).String())
+				if err != nil {
+					return
 				}
+				atomic.AddUint64(&requests, 1)
+				time.Sleep(500 * time.Millisecond)
+				start := time.Now()
+				_, err = p.Get(key)
+				atomic.AddUint64(&latency, uint64(time.Since(start)))
+				atomic.AddUint64(&requests, 1)
+				if err != nil {
+					fmt.Println("FAIL", err)
+				} else {
+					fmt.Println("SUCCESSSSSS")
+				}
+			}()
+
+		}
+		if simulation.PeerRegistry.Length() > 256 {
+			for _, fp := range simulation.PeerRegistry.Peers() {
 				if fp.GetType() == simulation.CORE {
 					fp.Leave()
 					break
@@ -97,6 +94,6 @@ func main() {
 			}
 
 		}
-		time.Sleep(200 * time.Millisecond)
+		time.Sleep(10 * time.Millisecond)
 	}
 }

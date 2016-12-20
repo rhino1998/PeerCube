@@ -3,6 +3,7 @@ package simulation
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 	"sync"
 	"time"
 )
@@ -243,12 +244,13 @@ func (p *stdPeer) SetClusterType(c *Cluster, t PeerType) {
 
 func (p *stdPeer) send(msg Message) {
 	go func() {
-		time.Sleep(Latency)
-		select {
-		case p.msgq <- msg:
-		case <-time.After(Timeout + Latency):
+		if rand.Float64() >= Mu {
+			time.Sleep(Latency)
+			select {
+			case p.msgq <- msg:
+			case <-time.After(Timeout + Latency):
+			}
 		}
-
 	}()
 }
 
