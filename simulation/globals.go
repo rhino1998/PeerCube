@@ -8,10 +8,10 @@ const (
 	SMin        int           = 8
 	SafteyValue int           = ((SMin-1)/3 + 1) * 2
 	TSplit      int           = 16
-	Timeout     time.Duration = 10000 * time.Millisecond
+	Timeout     time.Duration = 500 * time.Millisecond
 	QueueSize   int           = 256
 	WorkerCount int           = 8
-	Latency     time.Duration = 10 * time.Millisecond
+	Latency     time.Duration = 100 * time.Millisecond
 )
 
 var Mu float64 = 0

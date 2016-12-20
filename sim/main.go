@@ -25,8 +25,8 @@ func main() {
 		go p.Join(simulation.BootstrapCluster)
 		time.Sleep(80 * time.Millisecond)
 	}
-	simulation.Mu = 0.0
 	time.Sleep(8 * time.Second)
+	simulation.Mu = 0.0
 	go func() {
 		max := float64(6)
 		for c := 0; c < int(max); c++ {
